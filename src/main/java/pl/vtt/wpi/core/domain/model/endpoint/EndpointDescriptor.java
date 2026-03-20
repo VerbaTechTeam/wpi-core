@@ -3,7 +3,6 @@ package pl.vtt.wpi.core.domain.model.endpoint;
 import java.util.Set;
 
 public record EndpointDescriptor(
-        EndpointId id,
         Resource resource,
         Set<Method> allowedMethods,
         Set<UserGroup> requiredAnyGroups,
