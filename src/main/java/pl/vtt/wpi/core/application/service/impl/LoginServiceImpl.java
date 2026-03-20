@@ -26,9 +26,14 @@ public class LoginServiceImpl implements LoginService {
             throw new IncorrectUsernameOrPasswordException();
         }
         authorize(username, password);
-        Credentials credentials = getCredentials();
-        authorize(credentials);
-        return credentials;
+        try {
+            Credentials credentials = getCredentials();
+            authorize(credentials);
+            return credentials;
+        } catch (IncorrectUsernameOrPasswordException | RuntimeException e) {
+            AuthorizationHolder.clear();
+            throw e;
+        }
     }
 
     private Credentials getCredentials()
