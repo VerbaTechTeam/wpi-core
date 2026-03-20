@@ -100,7 +100,7 @@ class LoginServiceImplTest {
     @Test
     @DisplayName("Tests a null username")
     void null_username_exception() {
-        String username = "";
+        String username = null;
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
@@ -117,7 +117,7 @@ class LoginServiceImplTest {
     @DisplayName("Tests a null password")
     void null_password_exception() {
         String username = "test";
-        String password = "";
+        String password = null;
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
                 (target, payload) -> {

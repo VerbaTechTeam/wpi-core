@@ -60,6 +60,7 @@ public enum RequestTarget {
     }
 
     private boolean rejected(Set<UserGroup> groups) {
+        groups = groups == null ? EnumSet.noneOf(UserGroup.class) : groups;
         return groups.stream().noneMatch(descriptor().requiredAnyGroups()::contains);
     }
 
