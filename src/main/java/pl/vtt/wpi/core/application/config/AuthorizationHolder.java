@@ -12,7 +12,11 @@ public final class AuthorizationHolder {
         return authorization.get();
     }
 
-    public static void authorize(String type, String value) {
-        AuthorizationHolder.authorization.set(new Authorization(type, value));
+    public static void authorize(String type, String credentials) {
+        AuthorizationHolder.authorization.set(new Authorization(type, credentials));
+    }
+
+    public static void clear() {
+        AuthorizationHolder.authorization.remove();
     }
 }
