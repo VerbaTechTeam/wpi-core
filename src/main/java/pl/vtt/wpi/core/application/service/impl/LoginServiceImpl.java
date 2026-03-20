@@ -1,5 +1,6 @@
 package pl.vtt.wpi.core.application.service.impl;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
@@ -61,6 +62,6 @@ public class LoginServiceImpl implements LoginService {
     }
 
     private static String encode(String string) {
-        return new String(Base64.getEncoder().encode(string.getBytes()));
+        return Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8));
     }
 }

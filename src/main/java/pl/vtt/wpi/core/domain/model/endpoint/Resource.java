@@ -1,5 +1,9 @@
 package pl.vtt.wpi.core.domain.model.endpoint;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 public enum Resource {
     // Publiczne
     INFO("/api/info", Group.CORE),
@@ -33,10 +37,13 @@ public enum Resource {
     }
 
     public String url(String baseUrl, Object... args) {
-        if (baseUrl == null) {
-            return path.formatted(args);
-        }
-        return (baseUrl + path).formatted(args);
+        args = Arrays.stream(args)
+                .map(arg -> URLEncoder
+                        .encode(String.valueOf(arg), StandardCharsets.UTF_8)
+                        .replace("+", "%20"))
+                .toArray();
+        String formatted = path.formatted(args);
+        return baseUrl == null ? formatted : baseUrl + formatted;
     }
 
     public enum Group {
