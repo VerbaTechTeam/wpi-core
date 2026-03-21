@@ -2,21 +2,35 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
-import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.service.LoginService;
 import pl.vtt.wpi.core.application.util.RequestFactory;
 import pl.vtt.wpi.core.application.util.RequestHandler;
+import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
+import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.domain.model.endpoint.Method;
+import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
+
+import static pl.vtt.wpi.core.domain.model.endpoint.Method.POST;
+import static pl.vtt.wpi.core.domain.model.endpoint.RequestTarget.AUTH;
 
 public class LoginServiceImpl implements LoginService {
     private final RequestFactory<Void> requestFactory;
     private final RequestHandler<Void, Credentials> requestHandler;
 
+    @Deprecated(forRemoval = true)
     public LoginServiceImpl(RequestFactory<Void> requestFactory,
                             RequestHandler<Void, Credentials> requestHandler) {
         this.requestFactory = requestFactory;
+        this.requestHandler = requestHandler;
+    }
+
+    public LoginServiceImpl(String url, Supplier<Authorization> authorizationSupplier,
+                            RequestHandler<Void, Credentials> requestHandler) {
+        this.requestFactory = new LoginRequestFactory(url, authorizationSupplier);
         this.requestHandler = requestHandler;
     }
 
@@ -41,7 +55,7 @@ public class LoginServiceImpl implements LoginService {
             throws IncorrectUsernameOrPasswordException {
         Credentials responseBody;
         try {
-            responseBody = requestHandler.handle(requestFactory.create(RequestTarget.AUTH, null));
+            responseBody = requestHandler.handle(requestFactory.create(POST, AUTH, null));
         } catch (IncorrectUsernameOrPasswordException e) {
             throw e;
         } catch (Exception e) {
@@ -63,5 +77,13 @@ public class LoginServiceImpl implements LoginService {
 
     private static String encode(String string) {
         return Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private record LoginRequestFactory(String url, Supplier<Authorization> authorizationSupplier)
+            implements RequestFactory<Void> {
+        @Override
+        public Request<Void> create(Method method, RequestTarget target, Void payload) {
+            return new Request<>(POST, url, authorizationSupplier.get(), null);
+        }
     }
 }

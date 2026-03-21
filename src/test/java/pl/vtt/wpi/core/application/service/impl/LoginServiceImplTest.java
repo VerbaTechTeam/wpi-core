@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.domain.model.Credentials;
-import pl.vtt.wpi.core.domain.model.Request;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,11 +23,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> new Credentials(username, token)
+                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         try {
             Credentials credentials = instance.login(username, password);
@@ -54,11 +49,7 @@ class LoginServiceImplTest {
         String username = "test";
         String password = "test123";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> {
+                null, AuthorizationHolder::get, _ -> {
                     throw new IncorrectUsernameOrPasswordException();
                 }
         );
@@ -72,11 +63,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> new Credentials(username, token)
+                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
     }
@@ -88,11 +75,7 @@ class LoginServiceImplTest {
         String password = "";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> new Credentials(username, token)
+                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
     }
@@ -104,11 +87,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> new Credentials(username, token)
+                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
     }
@@ -120,11 +99,7 @@ class LoginServiceImplTest {
         String password = null;
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                (target, payload) -> {
-                    String url = target.descriptor().resource().url(null);
-                    return new Request<>(url, AuthorizationHolder.get(), payload);
-                },
-                _ -> new Credentials(username, token)
+                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
     }
@@ -132,7 +107,7 @@ class LoginServiceImplTest {
     @Test
     @DisplayName("Tests a logout")
     void logout_ok() {
-        LoginServiceImpl instance = new LoginServiceImpl(null, null);
+        LoginServiceImpl instance = new LoginServiceImpl(null, null, null);
         instance.logout();
         assertNull(AuthorizationHolder.get());
     }
