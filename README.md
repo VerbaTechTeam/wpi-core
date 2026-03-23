@@ -109,7 +109,7 @@ boolean allowed = RequestTarget.DATA_UPDATE.allow(Method.PUT, userGroups);
 A `Request<T>` carries the target URL, authorization header, and an optional typed payload:
 
 ```java
-record Request<T>(String url, Authorization authorization, T payload) {}
+record Request<T>(Method method, String url, Authorization authorization, T payload) {}
 ```
 
 ### Implementing a Client
