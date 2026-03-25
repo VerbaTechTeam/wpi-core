@@ -52,7 +52,12 @@ class LoginServiceImplTest {
                 _ -> {
                     throw new IncorrectUsernameOrPasswordException();
                 },
-                (response, type) -> null
+                new ResponseDeserializer() {
+                    @Override
+                    public <R> R deserialize(String responseBody, Class<R> type) {
+                        return null;
+                    }
+                }
         );
 
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(USERNAME, PASSWORD));
@@ -88,7 +93,12 @@ class LoginServiceImplTest {
 
     private static LoginServiceImpl instanceWithSuccessResponse(Credentials deserializedCredentials) {
         RequestAgent<Void> requestAgent = _ -> successResponseProxy();
-        ResponseDeserializer responseDeserializer = (response, type) -> deserializedCredentials;
+        ResponseDeserializer responseDeserializer = new ResponseDeserializer() {
+            @Override
+            public <R> R deserialize(String responseBody, Class<R> type) {
+                return type.cast(deserializedCredentials);
+            }
+        };
         return new LoginServiceImpl(null, AuthorizationHolder::get, requestAgent, responseDeserializer);
     }
 
