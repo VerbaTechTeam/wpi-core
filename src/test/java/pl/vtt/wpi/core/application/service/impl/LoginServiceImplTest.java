@@ -3,13 +3,23 @@ package pl.vtt.wpi.core.application.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
+import pl.vtt.wpi.core.application.util.RequestAgent;
+import pl.vtt.wpi.core.application.util.ResponseDeserializer;
+import pl.vtt.wpi.core.application.util.ResponseProxy;
 import pl.vtt.wpi.core.domain.model.Credentials;
+import pl.vtt.wpi.core.domain.model.Response;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LoginServiceImplTest {
+    private static final String USERNAME = "test";
+    private static final String PASSWORD = "test123";
+    private static final String TOKEN = "token";
 
     @BeforeEach
     void setUp() {
@@ -17,98 +27,76 @@ class LoginServiceImplTest {
     }
 
     @Test
-    @DisplayName(value = "Tests a casual login")
-    void casual_login_ok() {
-        String username = "test";
-        String password = "test123";
-        String token = "token";
-        LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+    @DisplayName("Should login successfully and update AuthorizationHolder")
+    void shouldLoginSuccessfully() {
+        LoginServiceImpl instance = instanceWithSuccessResponse(new Credentials(USERNAME, TOKEN));
+
+        Credentials credentials = assertDoesNotThrow(() -> instance.login(USERNAME, PASSWORD));
+
+        assertAll(
+                () -> assertNotNull(credentials),
+                () -> assertEquals(USERNAME, credentials.username()),
+                () -> assertEquals(TOKEN, credentials.token()),
+                () -> assertNotNull(AuthorizationHolder.get()),
+                () -> assertEquals("Basic", AuthorizationHolder.get().type()),
+                () -> assertEquals(encoded(USERNAME + ":" + TOKEN), AuthorizationHolder.get().credentials())
         );
-        try {
-            Credentials credentials = instance.login(username, password);
-            assertNotNull(credentials);
-            assertNotNull(credentials.username());
-            assertNotNull(credentials.token());
-            assertEquals(username, credentials.username());
-            assertEquals(token, credentials.token());
-            String expectedType = "Basic";
-            String expectedCredentials = new String(
-                    java.util.Base64.getEncoder().encode((username + ":" + token).getBytes())
-            );
-            assertEquals(expectedType, AuthorizationHolder.get().type());
-            assertEquals(expectedCredentials, AuthorizationHolder.get().credentials());
-        } catch (IncorrectUsernameOrPasswordException e) {
-            fail(e);
-        }
     }
 
     @Test
-    @DisplayName("Tests a wrong username or password")
-    void wrong_username_or_password_login_exception() {
-        String username = "test";
-        String password = "test123";
+    @DisplayName("Should throw when agent returns invalid credentials")
+    void shouldThrowWhenAgentReturnsInvalidCredentials() {
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> {
+                null,
+                AuthorizationHolder::get,
+                _ -> {
                     throw new IncorrectUsernameOrPasswordException();
-                }
+                },
+                (response, type) -> null
         );
-        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+
+        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(USERNAME, PASSWORD));
+    }
+
+    @ParameterizedTest(name = "Should reject invalid username: ''{0}''")
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "   "})
+    void shouldRejectInvalidUsername(String invalidUsername) {
+        LoginServiceImpl instance = instanceWithSuccessResponse(new Credentials(USERNAME, TOKEN));
+
+        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(invalidUsername, PASSWORD));
+    }
+
+    @ParameterizedTest(name = "Should reject invalid password: ''{0}''")
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "   "})
+    void shouldRejectInvalidPassword(String invalidPassword) {
+        LoginServiceImpl instance = instanceWithSuccessResponse(new Credentials(USERNAME, TOKEN));
+
+        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(USERNAME, invalidPassword));
     }
 
     @Test
-    @DisplayName("Tests a empty username")
-    void empty_username_exception() {
-        String username = "";
-        String password = "test123";
-        String token = "token";
-        LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
-        );
-        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
-    }
+    @DisplayName("Should clear authorization on logout")
+    void shouldClearAuthorizationOnLogout() {
+        LoginServiceImpl instance = new LoginServiceImpl(null, null, null, null);
 
-    @Test
-    @DisplayName("Tests a empty password")
-    void empty_password_exception() {
-        String username = "test";
-        String password = "";
-        String token = "token";
-        LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
-        );
-        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
-    }
-
-    @Test
-    @DisplayName("Tests a null username")
-    void null_username_exception() {
-        String username = null;
-        String password = "test123";
-        String token = "token";
-        LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
-        );
-        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
-    }
-
-    @Test
-    @DisplayName("Tests a null password")
-    void null_password_exception() {
-        String username = "test";
-        String password = null;
-        String token = "token";
-        LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
-        );
-        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
-    }
-
-    @Test
-    @DisplayName("Tests a logout")
-    void logout_ok() {
-        LoginServiceImpl instance = new LoginServiceImpl(null, null, null);
         instance.logout();
+
         assertNull(AuthorizationHolder.get());
+    }
+
+    private static LoginServiceImpl instanceWithSuccessResponse(Credentials deserializedCredentials) {
+        RequestAgent<Void> requestAgent = _ -> successResponseProxy();
+        ResponseDeserializer responseDeserializer = (response, type) -> deserializedCredentials;
+        return new LoginServiceImpl(null, AuthorizationHolder::get, requestAgent, responseDeserializer);
+    }
+
+    private static ResponseProxy successResponseProxy() {
+        return () -> new Response("response", null);
+    }
+
+    private static String encoded(String value) {
+        return new String(java.util.Base64.getEncoder().encode(value.getBytes()));
     }
 }
