@@ -3,6 +3,7 @@ package pl.vtt.wpi.core.application.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,8 +45,8 @@ class LoginServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw when agent returns invalid credentials")
-    void shouldThrowWhenAgentReturnsInvalidCredentials() {
+    @DisplayName("Should propagate exception thrown by agent")
+    void shouldPropagateAgentException() {
         LoginServiceImpl instance = new LoginServiceImpl(
                 null,
                 AuthorizationHolder::get,
@@ -55,7 +56,8 @@ class LoginServiceImplTest {
                 new ResponseDeserializer() {
                     @Override
                     public <R> R deserialize(String responseBody, Class<R> type) {
-                        return null;
+                        fail("Deserializer should not be called when agent throws an exception");
+                        return type.cast(null);
                     }
                 }
         );
@@ -107,6 +109,6 @@ class LoginServiceImplTest {
     }
 
     private static String encoded(String value) {
-        return new String(java.util.Base64.getEncoder().encode(value.getBytes()));
+        return new String(java.util.Base64.getEncoder().encode(value.getBytes(StandardCharsets.UTF_8)));
     }
 }
