@@ -4,10 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
+import pl.vtt.wpi.core.application.exception.DeserializationException;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.service.LoginService;
 import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.application.util.RequestHandler;
+import pl.vtt.wpi.core.application.util.RequestAgent;
+import pl.vtt.wpi.core.application.util.ResponseDeserializer;
+import pl.vtt.wpi.core.application.util.ResponseProxy;
 import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
 import pl.vtt.wpi.core.domain.model.Request;
@@ -19,19 +22,24 @@ import static pl.vtt.wpi.core.domain.model.endpoint.RequestTarget.AUTH;
 
 public class LoginServiceImpl implements LoginService {
     private final RequestFactory<Void> requestFactory;
-    private final RequestHandler<Void, Credentials> requestHandler;
+    private final RequestAgent<Void> requestAgent;
+    private final ResponseDeserializer responseDeserializer;
 
     @Deprecated(forRemoval = true)
     public LoginServiceImpl(RequestFactory<Void> requestFactory,
-                            RequestHandler<Void, Credentials> requestHandler) {
+                            RequestAgent<Void> requestAgent,
+                            ResponseDeserializer responseDeserializer) {
         this.requestFactory = requestFactory;
-        this.requestHandler = requestHandler;
+        this.requestAgent = requestAgent;
+        this.responseDeserializer = responseDeserializer;
     }
 
     public LoginServiceImpl(String url, Supplier<Authorization> authorizationSupplier,
-                            RequestHandler<Void, Credentials> requestHandler) {
+                            RequestAgent<Void> requestAgent,
+                            ResponseDeserializer responseDeserializer) {
         this.requestFactory = new LoginRequestFactory(url, authorizationSupplier);
-        this.requestHandler = requestHandler;
+        this.requestAgent = requestAgent;
+        this.responseDeserializer = responseDeserializer;
     }
 
     @Override
@@ -55,7 +63,13 @@ public class LoginServiceImpl implements LoginService {
             throws IncorrectUsernameOrPasswordException {
         Credentials responseBody;
         try {
-            responseBody = requestHandler.handle(requestFactory.create(POST, AUTH, null));
+            ResponseProxy responseProxy = requestAgent.send(requestFactory.create(POST, AUTH, null));
+            String responseBodyString = responseProxy.getResponse().body();
+            try {
+                responseBody = responseDeserializer.deserialize(responseBodyString, Credentials.class);
+            } catch (RuntimeException e) {
+                throw new DeserializationException("Failed to deserialize login response", e);
+            }
         } catch (IncorrectUsernameOrPasswordException e) {
             throw e;
         } catch (Exception e) {

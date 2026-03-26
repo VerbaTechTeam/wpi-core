@@ -57,7 +57,7 @@ pl.vtt.wpi.core
 │   ├── exception    # Domain exceptions (e.g. IncorrectUsernameOrPasswordException)
 │   ├── service      # Service interfaces (LoginService)
 │   │   └── impl     # Internal implementations (not exported)
-│   └── util         # RequestFactory, RequestHandler interfaces
+│   └── util         # RequestFactory, RequestAgent, ResponseProxy, ResponseDeserializer interfaces
 └── domain
     └── model
         ├── Authorization.java
