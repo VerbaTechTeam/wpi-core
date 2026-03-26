@@ -56,13 +56,46 @@ class LoginServiceImplTest {
                 new ResponseDeserializer() {
                     @Override
                     public <R> R deserialize(String responseBody, Class<R> type) {
-                        fail("Deserializer should not be called when agent throws an exception");
-                        return type.cast(null);
+                        return fail("Deserializer should not be called when agent throws an exception");
                     }
                 }
         );
 
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(USERNAME, PASSWORD));
+    }
+
+
+    @Test
+    @DisplayName("Should throw IncorrectUsernameOrPasswordException when deserializer returns null")
+    void shouldThrowWhenDeserializerReturnsNull() {
+        LoginServiceImpl instance = instanceWithDeserializer(new ResponseDeserializer() {
+            @Override
+            public <R> R deserialize(String responseBody, Class<R> type) {
+                return null;
+            }
+        });
+
+        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(USERNAME, PASSWORD));
+        assertNull(AuthorizationHolder.get());
+    }
+
+    @Test
+    @DisplayName("Should wrap unchecked deserialization exception into RuntimeException")
+    void shouldWrapUncheckedDeserializerException() {
+        IllegalStateException cause = new IllegalStateException("broken deserialization");
+        LoginServiceImpl instance = instanceWithDeserializer(new ResponseDeserializer() {
+            @Override
+            public <R> R deserialize(String responseBody, Class<R> type) {
+                throw cause;
+            }
+        });
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> instance.login(USERNAME, PASSWORD));
+        assertAll(
+                () -> assertEquals("Login failed", exception.getMessage()),
+                () -> assertSame(cause, exception.getCause()),
+                () -> assertNull(AuthorizationHolder.get())
+        );
     }
 
     @ParameterizedTest(name = "Should reject invalid username: ''{0}''")
@@ -94,13 +127,16 @@ class LoginServiceImplTest {
     }
 
     private static LoginServiceImpl instanceWithSuccessResponse(Credentials deserializedCredentials) {
-        RequestAgent<Void> requestAgent = _ -> successResponseProxy();
-        ResponseDeserializer responseDeserializer = new ResponseDeserializer() {
+        return instanceWithDeserializer(new ResponseDeserializer() {
             @Override
             public <R> R deserialize(String responseBody, Class<R> type) {
                 return type.cast(deserializedCredentials);
             }
-        };
+        });
+    }
+
+    private static LoginServiceImpl instanceWithDeserializer(ResponseDeserializer responseDeserializer) {
+        RequestAgent<Void> requestAgent = _ -> successResponseProxy();
         return new LoginServiceImpl(null, AuthorizationHolder::get, requestAgent, responseDeserializer);
     }
 
