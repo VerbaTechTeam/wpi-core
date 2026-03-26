@@ -67,7 +67,10 @@ public class LoginServiceImpl implements LoginService {
             String responseBodyString = responseProxy.getResponse().body();
             try {
                 responseBody = responseDeserializer.deserialize(responseBodyString, Credentials.class);
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
+                if (e instanceof DeserializationException deserializationException) {
+                    throw deserializationException;
+                }
                 throw new DeserializationException("Failed to deserialize login response", e);
             }
         } catch (IncorrectUsernameOrPasswordException | DeserializationException e) {
