@@ -123,7 +123,17 @@ class LoginServiceImplTest {
     @Test
     @DisplayName("Should clear authorization on logout")
     void shouldClearAuthorizationOnLogout() {
-        LoginServiceImpl instance = new LoginServiceImpl(null, null, null, null);
+        LoginServiceImpl instance = new LoginServiceImpl(
+                new pl.vtt.wpi.core.application.util.RequestFactory<>() {
+                },
+                _ -> () -> new Response("response", null),
+                new ResponseDeserializer() {
+                    @Override
+                    public <R> R deserialize(String responseBody, Class<R> type) {
+                        return fail("Deserializer should not be used in logout test");
+                    }
+                }
+        );
         AuthorizationHolder.authorize("Basic", "seeded-token");
         assertNotNull(AuthorizationHolder.get());
 

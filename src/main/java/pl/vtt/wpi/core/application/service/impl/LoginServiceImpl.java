@@ -25,6 +25,11 @@ public class LoginServiceImpl implements LoginService {
     private final RequestAgent<Void> requestAgent;
     private final ResponseDeserializer responseDeserializer;
 
+    /**
+     * @deprecated Since 0.2.0 this constructor exposes low-level dependencies and will be removed
+     * in a future release after migration to the URL-based constructor.
+     * Use {@link #LoginServiceImpl(String, Supplier, RequestAgent, ResponseDeserializer)} instead.
+     */
     @Deprecated(forRemoval = true)
     public LoginServiceImpl(RequestFactory<Void> requestFactory,
                             RequestAgent<Void> requestAgent,

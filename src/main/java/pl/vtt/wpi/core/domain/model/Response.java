@@ -5,6 +5,11 @@ public final class Response {
     private final Exception exception;
 
     public Response(String body, Exception exception) {
+        if ((body == null) == (exception == null)) {
+            throw new IllegalArgumentException(
+                    "Exactly one of body or exception must be non-null"
+            );
+        }
         this.body = body;
         this.exception = exception;
     }
