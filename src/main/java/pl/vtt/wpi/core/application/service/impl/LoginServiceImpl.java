@@ -70,7 +70,7 @@ public class LoginServiceImpl implements LoginService {
             } catch (RuntimeException e) {
                 throw new DeserializationException("Failed to deserialize login response", e);
             }
-        } catch (IncorrectUsernameOrPasswordException e) {
+        } catch (IncorrectUsernameOrPasswordException | DeserializationException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Login failed", e);
