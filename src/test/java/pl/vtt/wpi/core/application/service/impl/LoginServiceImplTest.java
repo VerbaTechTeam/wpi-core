@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
+import pl.vtt.wpi.core.application.exception.DeserializationException;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.util.RequestAgent;
 import pl.vtt.wpi.core.application.util.ResponseDeserializer;
@@ -80,8 +81,8 @@ class LoginServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should wrap unchecked deserialization exception into RuntimeException")
-    void shouldWrapUncheckedDeserializerException() {
+    @DisplayName("Should map unchecked deserialization exception to DeserializationException")
+    void shouldMapUncheckedDeserializerException() {
         IllegalStateException cause = new IllegalStateException("broken deserialization");
         LoginServiceImpl instance = instanceWithDeserializer(new ResponseDeserializer() {
             @Override
@@ -90,9 +91,12 @@ class LoginServiceImplTest {
             }
         });
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> instance.login(USERNAME, PASSWORD));
+        DeserializationException exception = assertThrows(
+                DeserializationException.class,
+                () -> instance.login(USERNAME, PASSWORD)
+        );
         assertAll(
-                () -> assertEquals("Login failed", exception.getMessage()),
+                () -> assertEquals("Failed to deserialize login response", exception.getMessage()),
                 () -> assertSame(cause, exception.getCause()),
                 () -> assertNull(AuthorizationHolder.get())
         );

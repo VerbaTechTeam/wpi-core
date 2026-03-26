@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
+import pl.vtt.wpi.core.application.exception.DeserializationException;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.service.LoginService;
 import pl.vtt.wpi.core.application.util.RequestFactory;
@@ -43,7 +44,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public Credentials login(String username, String password)
-            throws IncorrectUsernameOrPasswordException {
+            throws IncorrectUsernameOrPasswordException, DeserializationException {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new IncorrectUsernameOrPasswordException();
         }
@@ -52,19 +53,24 @@ public class LoginServiceImpl implements LoginService {
             Credentials credentials = getCredentials();
             authorize(credentials);
             return credentials;
-        } catch (IncorrectUsernameOrPasswordException | RuntimeException e) {
+        } catch (IncorrectUsernameOrPasswordException | DeserializationException | RuntimeException e) {
             AuthorizationHolder.clear();
             throw e;
         }
     }
 
     private Credentials getCredentials()
-            throws IncorrectUsernameOrPasswordException {
+            throws IncorrectUsernameOrPasswordException, DeserializationException {
         Credentials responseBody;
         try {
             ResponseProxy responseProxy = requestAgent.send(requestFactory.create(POST, AUTH, null));
-            responseBody = responseDeserializer.deserialize(responseProxy.getResponse().body(), Credentials.class);
-        } catch (IncorrectUsernameOrPasswordException e) {
+            String responseBodyString = responseProxy.getResponse().body();
+            try {
+                responseBody = responseDeserializer.deserialize(responseBodyString, Credentials.class);
+            } catch (RuntimeException e) {
+                throw new DeserializationException("Failed to deserialize login response", e);
+            }
+        } catch (IncorrectUsernameOrPasswordException | DeserializationException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Login failed", e);
