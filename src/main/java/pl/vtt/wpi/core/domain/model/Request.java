@@ -2,13 +2,13 @@ package pl.vtt.wpi.core.domain.model;
 
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 
-public record Request<T>(Method method, String url, Authorization authorization, T payload) {
-    public Request {
-        method = method == null ? payload == null ? Method.GET : Method.POST : method;
-    }
+import java.time.LocalDateTime;
 
-    @Deprecated(since = "0.1.1", forRemoval = true)
-    public Request(String url, Authorization authorization, T payload) {
-        this(null, url, authorization, payload);
+public record Request<T>(LocalDateTime timestamp, Method method, String url,
+                         Authorization authorization, T payload) {
+    public Request {
+        java.util.Objects.requireNonNull(method, "Method cannot be null");
+        java.util.Objects.requireNonNull(url, "URL cannot be null");
+        timestamp = java.util.Objects.requireNonNullElse(timestamp, LocalDateTime.now());
     }
 }

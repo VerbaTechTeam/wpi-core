@@ -1,6 +1,6 @@
 package pl.vtt.wpi.core.domain.model.device;
 
-import pl.vtt.wpi.core.domain.model.Color;
+import pl.vtt.wpi.core.domain.model.color.RgbColor;
 
 import java.time.LocalTime;
 import java.util.Collections;
@@ -15,8 +15,8 @@ public record CurrentState(
         String             action,
         List<PixelProgram> programs,
         RuntimeData        data,
-        List<Color>        pixels,
-        Color              nextPixel,
+        List<RgbColor>     pixels,
+        RgbColor           nextPixel,
         Integer            nol,
         Integer            restartCountdown,
         Integer            pixelProgram,
@@ -42,7 +42,7 @@ public record CurrentState(
         }
     }
 
-    public static class Builder {
+    public static final class Builder {
         private Boolean            alive;
         private LocalTime          time;
         private String             waterflow;
@@ -51,8 +51,8 @@ public record CurrentState(
         private String             action;
         private List<PixelProgram> programs;
         private RuntimeData        data;
-        private List<Color>        pixels;
-        private Color              nextPixel;
+        private List<RgbColor>     pixels;
+        private RgbColor           nextPixel;
         private Integer            nol;
         private Integer            restartCountdown;
         private Integer            pixelProgram;
@@ -69,27 +69,69 @@ public record CurrentState(
         }
 
         public Builder from(CurrentState currentState) {
-            this.alive = currentState.alive;
-            this.time = currentState.time;
-            this.waterflow = currentState.waterflow;
-            this.sensorPin = currentState.sensorPin;
-            this.offPin = currentState.offPin;
-            this.action = currentState.action;
-            this.programs = currentState.programs;
-            this.data = currentState.data;
-            this.pixels = currentState.pixels;
-            this.nextPixel = currentState.nextPixel;
-            this.nol = currentState.nol;
-            this.restartCountdown = currentState.restartCountdown;
-            this.pixelProgram = currentState.pixelProgram;
-            this.brightness = currentState.brightness;
-            this.stepTime = currentState.stepTime;
-            this.on = currentState.on;
-            this.sensorDependency = currentState.sensorDependency;
-            this.timeDependency = currentState.timeDependency;
-            this.overflow = currentState.overflow;
-            this.onTime = currentState.onTime;
-            this.offTime = currentState.offTime;
+            if (this.alive != null) {
+                this.alive = currentState.alive;
+            }
+            if (this.time != null) {
+                this.time = currentState.time;
+            }
+            if (this.waterflow != null) {
+                this.waterflow = currentState.waterflow;
+            }
+            if (this.sensorPin != null) {
+                this.sensorPin = currentState.sensorPin;
+            }
+            if (this.offPin != null) {
+                this.offPin = currentState.offPin;
+            }
+            if (this.action != null) {
+                this.action = currentState.action;
+            }
+            if (this.programs != null) {
+                this.programs = currentState.programs;
+            }
+            if (this.data != null) {
+                this.data = currentState.data;
+            }
+            if (this.pixels != null) {
+                this.pixels = currentState.pixels;
+            }
+            if (this.nextPixel != null) {
+                this.nextPixel = currentState.nextPixel;
+            }
+            if (this.nol != null) {
+                this.nol = currentState.nol;
+            }
+            if (this.restartCountdown != null) {
+                this.restartCountdown = currentState.restartCountdown;
+            }
+            if (this.pixelProgram != null) {
+                this.pixelProgram = currentState.pixelProgram;
+            }
+            if (this.brightness != null) {
+                this.brightness = currentState.brightness;
+            }
+            if (this.stepTime != null) {
+                this.stepTime = currentState.stepTime;
+            }
+            if (this.on != null) {
+                this.on = currentState.on;
+            }
+            if (this.sensorDependency != null) {
+                this.sensorDependency = currentState.sensorDependency;
+            }
+            if (this.timeDependency != null) {
+                this.timeDependency = currentState.timeDependency;
+            }
+            if (this.overflow != null) {
+                this.overflow = currentState.overflow;
+            }
+            if (this.onTime != null) {
+                this.onTime = currentState.onTime;
+            }
+            if (this.offTime != null) {
+                this.offTime = currentState.offTime;
+            }
             return this;
         }
 
@@ -133,12 +175,12 @@ public record CurrentState(
             return this;
         }
 
-        public Builder pixels(List<Color> pixels) {
+        public Builder pixels(List<RgbColor> pixels) {
             this.pixels = pixels == null ? Collections.emptyList() : List.copyOf(pixels);
             return this;
         }
 
-        public Builder nextPixel(Color nextPixel) {
+        public Builder nextPixel(RgbColor nextPixel) {
             this.nextPixel = nextPixel;
             return this;
         }

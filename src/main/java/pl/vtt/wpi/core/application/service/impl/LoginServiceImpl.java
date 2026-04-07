@@ -1,7 +1,6 @@
 package pl.vtt.wpi.core.application.service.impl;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.time.LocalDateTime;
 import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
@@ -40,10 +39,10 @@ public class LoginServiceImpl implements LoginService {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new IncorrectUsernameOrPasswordException();
         }
-        authorize(username, password);
+        AuthorizationHolder.authorize(username, password);
         try {
             Credentials credentials = getCredentials();
-            authorize(credentials);
+            AuthorizationHolder.authorize(credentials);
             return credentials;
         } catch (IncorrectUsernameOrPasswordException | RuntimeException e) {
             AuthorizationHolder.clear();
@@ -67,23 +66,11 @@ public class LoginServiceImpl implements LoginService {
         return responseBody;
     }
 
-    private static void authorize(Credentials credentials) {
-        authorize(credentials.username(), credentials.token());
-    }
-
-    private static void authorize(String username, String credentials) {
-        AuthorizationHolder.authorize("Basic", encode(String.join(":", username, credentials)));
-    }
-
-    private static String encode(String string) {
-        return Base64.getEncoder().encodeToString(string.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private record LoginRequestFactory(String url, Supplier<Authorization> authorizationSupplier)
+    private record LoginRequestFactory(String url, Supplier<Authorization> supplier)
             implements RequestFactory<Void> {
         @Override
         public Request<Void> create(Method method, RequestTarget target, Void payload) {
-            return new Request<>(POST, url, authorizationSupplier.get(), null);
+            return new Request<>(LocalDateTime.now(), POST, url, supplier.get(), null);
         }
     }
 }

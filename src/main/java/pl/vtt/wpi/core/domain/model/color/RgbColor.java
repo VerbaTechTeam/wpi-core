@@ -1,7 +1,7 @@
-package pl.vtt.wpi.core.domain.model;
+package pl.vtt.wpi.core.domain.model.color;
 
-public record Color(int red, int green, int blue) {
-    public Color {
+public record RgbColor(int red, int green, int blue) {
+    public RgbColor {
         if (red < 0 || red > 255) {
             throw new IllegalArgumentException("Red value must be between 0 and 255");
         }

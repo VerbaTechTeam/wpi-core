@@ -2,7 +2,7 @@ package pl.vtt.wpi.core.application.service;
 
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
 import pl.vtt.wpi.core.application.exception.PixelProgramNotFoundException;
-import pl.vtt.wpi.core.domain.model.Color;
+import pl.vtt.wpi.core.domain.model.color.RgbColor;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 
 import java.util.List;
@@ -15,9 +15,9 @@ public interface PixelProgramService {
 
     PixelProgram get(int index)
             throws PixelProgramNotFoundException;
-    PixelProgram singleton(List<Color> pixelProgram);
-    PixelProgram save(List<Color> pixelProgram);
-    PixelProgram update(int index, List<Color> pixelProgram)
+    PixelProgram singleton(List<RgbColor> pixelProgram);
+    PixelProgram save(List<RgbColor> pixelProgram);
+    PixelProgram update(int index, List<RgbColor> pixelProgram)
             throws PixelProgramNotFoundException;
     PixelProgram remove(int index)
             throws PixelProgramNotFoundException, DataInconsistencyException;
