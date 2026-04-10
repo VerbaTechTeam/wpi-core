@@ -1,7 +1,7 @@
 package pl.vtt.wpi.core.domain.port;
 
+import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.util.RequestFactory;
 import pl.vtt.wpi.core.application.util.RequestHandler;
@@ -19,7 +19,7 @@ class UsersOutputPortTest {
                 new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
         RequestHandler<Void, List<User>> requestHandler = request -> {
             assertEquals(Method.GET, request.method());
-            return List.of(new User("admin", Set.of(UserGroup.ADMIN)));
+            return List.of(new User("admin", EnumSet.of(UserGroup.ADMIN)));
         };
         UsersOutputPort port = new UsersOutputPort(requestFactory, requestHandler);
 

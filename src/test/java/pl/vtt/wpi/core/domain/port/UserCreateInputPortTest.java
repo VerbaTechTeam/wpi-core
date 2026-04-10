@@ -1,6 +1,6 @@
 package pl.vtt.wpi.core.domain.port;
 
-import java.util.Set;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.util.RequestFactory;
@@ -31,7 +31,7 @@ class UserCreateInputPortTest {
         RequestSender requestSender = sent::set;
         UserCreateInputPort port = new UserCreateInputPort(requestFactory, requestSender);
 
-        port.send(new User("admin", Set.of(UserGroup.ADMIN)));
+        port.send(new User("admin", EnumSet.of(UserGroup.ADMIN)));
 
         assertEquals(Method.POST, sent.get().method());
     }
