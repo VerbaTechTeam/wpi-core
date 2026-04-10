@@ -13,6 +13,7 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LoginServiceImplTest {
+    private static final String URL = "http://localhost";
 
     @BeforeEach
     void setUp() {
@@ -26,7 +27,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+                URL, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         try {
             Credentials credentials = instance.login(username, password);
@@ -49,7 +50,7 @@ class LoginServiceImplTest {
         String username = "test";
         String password = "test123";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> {
+                URL, AuthorizationHolder::get, _ -> {
                     throw new IncorrectUsernameOrPasswordException();
                 }
         );
@@ -64,7 +65,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+                URL, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
         assertNull(AuthorizationHolder.get());
@@ -77,7 +78,7 @@ class LoginServiceImplTest {
         String password = "";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+                URL, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
         assertNull(AuthorizationHolder.get());
@@ -90,7 +91,7 @@ class LoginServiceImplTest {
         String password = "test123";
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+                URL, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
         assertNull(AuthorizationHolder.get());
@@ -103,7 +104,7 @@ class LoginServiceImplTest {
         String password = null;
         String token = "token";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> new Credentials(username, token)
+                URL, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
         assertNull(AuthorizationHolder.get());
@@ -115,7 +116,7 @@ class LoginServiceImplTest {
         String username = "test";
         String password = "test123";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> null
+                URL, AuthorizationHolder::get, _ -> null
         );
 
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
@@ -128,7 +129,7 @@ class LoginServiceImplTest {
         String username = "test";
         String password = "test123";
         LoginServiceImpl instance = new LoginServiceImpl(
-                null, AuthorizationHolder::get, _ -> {
+                URL, AuthorizationHolder::get, _ -> {
                     throw new IllegalStateException("connection lost");
                 }
         );
