@@ -1,9 +1,9 @@
 package pl.vtt.wpi.core.domain.model.color;
 
-public record LabColor(float l, float a, float b) {
+public record LabColor(float lightness, float a, float b) {
     public LabColor {
-        if (l < 0 || l > 100) {
-            throw new IllegalArgumentException("L value must be between 0 and 100");
+        if (lightness < 0 || lightness > 100) {
+            throw new IllegalArgumentException("Lightness value must be between 0 and 100");
         }
         if (a < -128 || a > 127) {
             throw new IllegalArgumentException("A value must be between -128 and 127");
@@ -15,13 +15,13 @@ public record LabColor(float l, float a, float b) {
 
     public RgbColor toRgb() {
         // Convert Lab to XYZ
-        float y = (l + 16) / 116;
+        float y = (lightness + 16) / 116;
         float x = a / 500 + y;
         float z = y - b / 200;
 
-        x = 95.047f * (x > 0.008856f ? (float) Math.pow(x, 3) : (x - (float) 16 / 116) / 7.787f);
-        y = 100.000f * (y > 0.008856f ? (float) Math.pow(y, 3) : (y - (float) 16 / 116) / 7.787f);
-        z = 108.883f * (z > 0.008856f ? (float) Math.pow(z, 3) : (z - (float) 16 / 116) / 7.787f);
+        x = 95.047f * labPivot(x);
+        y = 100.000f * labPivot(y);
+        z = 108.883f * labPivot(z);
 
         // Convert XYZ to RGB
         // Convert XYZ to linear RGB (D65, sRGB)
@@ -38,6 +38,11 @@ public record LabColor(float l, float a, float b) {
         int b = Math.round((float) (gammaCorrect(bLin) * 255.0));
 
         return new RgbColor(clamp(r), clamp(g), clamp(b));
+    }
+
+    private static float labPivot(float t) {
+        float t3 = t * t * t;
+        return t3 > 0.008856f ? t3 : (t - 16f / 116f) / 7.787f;
     }
 
     private static double gammaCorrect(double c) {
