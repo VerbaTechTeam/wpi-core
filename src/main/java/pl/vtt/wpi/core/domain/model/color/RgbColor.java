@@ -12,4 +12,8 @@ public record RgbColor(int red, int green, int blue) {
             throw new IllegalArgumentException("Blue value must be between 0 and 255");
         }
     }
+
+    public int[] toArray() {
+        return new int[]{red, green, blue};
+    }
 }

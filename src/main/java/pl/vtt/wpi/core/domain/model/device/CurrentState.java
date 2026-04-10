@@ -69,67 +69,67 @@ public record CurrentState(
         }
 
         public Builder from(CurrentState currentState) {
-            if (this.alive != null) {
+            if (currentState.alive != null) {
                 this.alive = currentState.alive;
             }
-            if (this.time != null) {
+            if (currentState.time != null) {
                 this.time = currentState.time;
             }
-            if (this.waterflow != null) {
+            if (currentState.waterflow != null) {
                 this.waterflow = currentState.waterflow;
             }
-            if (this.sensorPin != null) {
+            if (currentState.sensorPin != null) {
                 this.sensorPin = currentState.sensorPin;
             }
-            if (this.offPin != null) {
+            if (currentState.offPin != null) {
                 this.offPin = currentState.offPin;
             }
-            if (this.action != null) {
+            if (currentState.action != null) {
                 this.action = currentState.action;
             }
-            if (this.programs != null) {
+            if (currentState.programs != null) {
                 this.programs = currentState.programs;
             }
-            if (this.data != null) {
+            if (currentState.data != null) {
                 this.data = currentState.data;
             }
-            if (this.pixels != null) {
+            if (currentState.pixels != null) {
                 this.pixels = currentState.pixels;
             }
-            if (this.nextPixel != null) {
+            if (currentState.nextPixel != null) {
                 this.nextPixel = currentState.nextPixel;
             }
-            if (this.nol != null) {
+            if (currentState.nol != null) {
                 this.nol = currentState.nol;
             }
-            if (this.restartCountdown != null) {
+            if (currentState.restartCountdown != null) {
                 this.restartCountdown = currentState.restartCountdown;
             }
-            if (this.pixelProgram != null) {
+            if (currentState.pixelProgram != null) {
                 this.pixelProgram = currentState.pixelProgram;
             }
-            if (this.brightness != null) {
+            if (currentState.brightness != null) {
                 this.brightness = currentState.brightness;
             }
-            if (this.stepTime != null) {
+            if (currentState.stepTime != null) {
                 this.stepTime = currentState.stepTime;
             }
-            if (this.on != null) {
+            if (currentState.on != null) {
                 this.on = currentState.on;
             }
-            if (this.sensorDependency != null) {
+            if (currentState.sensorDependency != null) {
                 this.sensorDependency = currentState.sensorDependency;
             }
-            if (this.timeDependency != null) {
+            if (currentState.timeDependency != null) {
                 this.timeDependency = currentState.timeDependency;
             }
-            if (this.overflow != null) {
+            if (currentState.overflow != null) {
                 this.overflow = currentState.overflow;
             }
-            if (this.onTime != null) {
+            if (currentState.onTime != null) {
                 this.onTime = currentState.onTime;
             }
-            if (this.offTime != null) {
+            if (currentState.offTime != null) {
                 this.offTime = currentState.offTime;
             }
             return this;
