@@ -9,4 +9,5 @@ module wpi.core {
     exports pl.vtt.wpi.core.domain.model.color;
     exports pl.vtt.wpi.core.domain.model.device;
     exports pl.vtt.wpi.core.domain.model.endpoint;
+    exports pl.vtt.wpi.core.domain.port;
 }
