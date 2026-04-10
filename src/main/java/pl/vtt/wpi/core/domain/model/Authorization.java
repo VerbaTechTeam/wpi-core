@@ -16,6 +16,8 @@ public record Authorization(String type, String credentials) {
     }
 
     public static Authorization basic(String username, String password) {
+        Objects.requireNonNull(username, "username must not be null");
+        Objects.requireNonNull(password, "password must not be null");
         byte[] credentials = (username + ":" + password).getBytes(StandardCharsets.UTF_8);
         return new Authorization("Basic", getEncoder().encodeToString(credentials));
     }

@@ -25,7 +25,7 @@ public final class Color {
         double r = color.red() / 255.0;
         double g = color.green() / 255.0;
         double b = color.blue() / 255.0;
-        
+
         double kNorm = 1.0 - Math.max(r, Math.max(g, b));
         int k = (int) Math.round(kNorm * 100);
         int c, m, y;

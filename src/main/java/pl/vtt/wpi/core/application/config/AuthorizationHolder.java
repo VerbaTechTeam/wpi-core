@@ -15,8 +15,6 @@ public final class AuthorizationHolder {
     }
 
     public static void authorize(String username, String password) {
-        Objects.requireNonNull(username, "username must not be null");
-        Objects.requireNonNull(password, "password must not be null");
         authorization.set(Authorization.basic(username, password));
     }
 
