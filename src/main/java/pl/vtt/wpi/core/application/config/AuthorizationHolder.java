@@ -1,5 +1,6 @@
 package pl.vtt.wpi.core.application.config;
 
+import java.util.Objects;
 import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
 
@@ -14,11 +15,13 @@ public final class AuthorizationHolder {
     }
 
     public static void authorize(String username, String password) {
+        Objects.requireNonNull(username, "username must not be null");
+        Objects.requireNonNull(password, "password must not be null");
         authorization.set(Authorization.basic(username, password));
     }
 
     public static void authorize(Credentials credentials) {
-        if (credentials == null) {
+        if (credentials == null || credentials.username() == null || credentials.token() == null) {
             throw new IllegalArgumentException("Credentials cannot be null");
         }
         authorize(credentials.username(), credentials.token());

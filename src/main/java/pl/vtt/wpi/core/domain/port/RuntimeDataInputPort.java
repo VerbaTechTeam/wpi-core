@@ -30,14 +30,14 @@ public class RuntimeDataInputPort implements InputPort<RuntimeData> {
                 || obj.overflow() == null || obj.sensorDependency() == null
                 || obj.timeDependency() == null || obj.defaultRestartCountdown() == null
                 || obj.offTime() == null || obj.onTime() == null
-                || obj.timeZone() == null || obj.pixelProgram() == null
+                || obj.zoneId() == null || obj.pixelProgram() == null
                 || obj.stepTime() == null) {
             method = Method.PATCH;
         }
-        Request<RuntimeData> request = requestFactory.create(
-                method, RequestTarget.DATA_UPDATE, obj
-        );
         try {
+            Request<RuntimeData> request = requestFactory.create(
+                    method, RequestTarget.DATA_UPDATE, obj
+            );
             requestSender.send(request);
         } catch (Exception e) {
             throw new InputPortException("Cannot send the runtime data", e);

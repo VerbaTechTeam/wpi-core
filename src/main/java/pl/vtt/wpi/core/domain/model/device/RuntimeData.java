@@ -1,7 +1,8 @@
 package pl.vtt.wpi.core.domain.model.device;
 
 import java.time.LocalTime;
-import java.util.TimeZone;
+import java.time.ZoneId;
+import java.util.Objects;
 
 public record RuntimeData(
         Integer   nol,
@@ -15,7 +16,7 @@ public record RuntimeData(
         Boolean   timeDependency,
         LocalTime onTime,
         LocalTime offTime,
-        TimeZone  timeZone
+        ZoneId zoneId
 ) {
     public static final class Builder {
         private Integer   nol;
@@ -29,7 +30,7 @@ public record RuntimeData(
         private Boolean   timeDependency;
         private LocalTime onTime;
         private LocalTime offTime;
-        private TimeZone  timeZone;
+        private ZoneId zoneId;
 
         public Builder() {
             this.nol = 3;
@@ -43,10 +44,11 @@ public record RuntimeData(
             this.timeDependency = true;
             this.onTime = LocalTime.of(8, 0);
             this.offTime = LocalTime.of(20, 0);
-            this.timeZone = TimeZone.getDefault();
+            this.zoneId = ZoneId.systemDefault();
         }
 
         public Builder from(RuntimeData data) {
+            Objects.requireNonNull(data, "data cannot be null");
             if (data.nol() != null) {
                 this.nol = data.nol();
             }
@@ -80,8 +82,8 @@ public record RuntimeData(
             if (data.offTime() != null) {
                 this.offTime = data.offTime();
             }
-            if (data.timeZone() != null) {
-                this.timeZone = data.timeZone();
+            if (data.zoneId() != null) {
+                this.zoneId = data.zoneId();
             }
             return this;
         }
@@ -141,8 +143,8 @@ public record RuntimeData(
             return this;
         }
 
-        public Builder timeZone(TimeZone timeZone) {
-            this.timeZone = timeZone;
+        public Builder zoneId(ZoneId zoneId) {
+            this.zoneId = zoneId;
             return this;
         }
 
@@ -159,7 +161,7 @@ public record RuntimeData(
                     timeDependency,
                     onTime,
                     offTime,
-                    timeZone
+                    zoneId
             );
         }
     }

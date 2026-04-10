@@ -24,11 +24,25 @@ public record LabColor(float l, float a, float b) {
         z = 108.883f * (z > 0.008856f ? (float) Math.pow(z, 3) : (z - (float) 16 / 116) / 7.787f);
 
         // Convert XYZ to RGB
-        int r = Math.round(x * 0.4124564f + y * 0.2126729f + z * 0.0193339f);
-        int g = Math.round(x * 0.2126729f + y * 0.7151522f + z * 0.1191920f);
-        int b = Math.round(x * 0.0193339f + y * 0.1191920f + z * 0.9503041f);
+        // Convert XYZ to linear RGB (D65, sRGB)
+        double xn = x / 100.0;
+        double yn = y / 100.0;
+        double zn = z / 100.0;
+
+        double rLin =  3.2406 * xn - 1.5372 * yn - 0.4986 * zn;
+        double gLin = -0.9689 * xn + 1.8758 * yn + 0.0415 * zn;
+        double bLin =  0.0557 * xn - 0.2040 * yn + 1.0570 * zn;
+
+        int r = Math.round((float) (gammaCorrect(rLin) * 255.0));
+        int g = Math.round((float) (gammaCorrect(gLin) * 255.0));
+        int b = Math.round((float) (gammaCorrect(bLin) * 255.0));
 
         return new RgbColor(clamp(r), clamp(g), clamp(b));
+    }
+
+    private static double gammaCorrect(double c) {
+        c = Math.clamp(c, 0.0, 1.0);
+        return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1.0 / 2.4) - 0.055;
     }
 
     private int clamp(int value) {

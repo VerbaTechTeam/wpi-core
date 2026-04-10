@@ -17,9 +17,9 @@ public record CmykColor(int cyan, int magenta, int yellow, int key) {
     }
 
     public RgbColor toRgb() {
-        int r = (int) ((1 - (cyan / 100.0)) * (1 - (key / 100.0)) * 255);
-        int g = (int) ((1 - (magenta / 100.0)) * (1 - (key / 100.0)) * 255);
-        int b = (int) ((1 - (yellow / 100.0)) * (1 - (key / 100.0)) * 255);
+        int r = Math.toIntExact(Math.round((1 - (cyan / 100.0)) * (1 - (key / 100.0)) * 255));
+        int g = Math.toIntExact(Math.round((1 - (magenta / 100.0)) * (1 - (key / 100.0)) * 255));
+        int b = Math.toIntExact(Math.round((1 - (yellow / 100.0)) * (1 - (key / 100.0)) * 255));
         return new RgbColor(r, g, b);
     }
 }

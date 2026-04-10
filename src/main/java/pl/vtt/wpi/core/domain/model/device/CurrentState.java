@@ -5,6 +5,7 @@ import pl.vtt.wpi.core.domain.model.color.RgbColor;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public record CurrentState(
         Boolean            alive,
@@ -69,6 +70,7 @@ public record CurrentState(
         }
 
         public Builder from(CurrentState currentState) {
+            Objects.requireNonNull(currentState, "currentState cannot be null");
             if (currentState.alive != null) {
                 this.alive = currentState.alive;
             }
