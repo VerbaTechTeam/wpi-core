@@ -75,7 +75,9 @@ pl.vtt.wpi.core
 
 ### Authentication
 
-Login is handled by `LoginService`. On success, the resulting `Credentials` (username + token) are stored as a Basic Auth header in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
+Login is handled by `LoginService`. Internally, `LoginServiceImpl` delegates authorization to a dedicated port (`AuthOutputPort`), so request execution is decoupled from service orchestration.
+
+On success, the resulting `Credentials` (username + token) are stored as a Basic Auth header in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
 
 ```java
 // Provided by a higher-level module
@@ -125,6 +127,15 @@ LoginService loginService = ...;
 Credentials credentials = loginService.login("admin", "password");
 loginService.logout();
 ```
+
+### Domain Ports
+
+The package `pl.vtt.wpi.core.domain.port` contains concrete port implementations for domain operations:
+
+- **Output ports**: `AuthOutputPort`, `DeviceInfoOutputPort`, `RuntimeDataOutputPort`, `CurrentStateOutputPort`, `PixelProgramsOutputPort`, `UsersOutputPort`
+- **Input ports**: `RuntimeDataInputPort`, `WifiConfigInputPort`, `PixelProgramsInputPort`, `UserCreateInputPort`, `RestartInputPort`, `LogsDeleteInputPort`
+
+These ports encapsulate endpoint/method selection and exception mapping (`InputPortException` / `OutputPortException`), making application services thinner and easier to test.
 
 ## Building & Testing
 

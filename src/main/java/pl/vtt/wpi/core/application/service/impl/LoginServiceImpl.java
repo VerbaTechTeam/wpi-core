@@ -7,30 +7,33 @@ import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordExceptio
 import pl.vtt.wpi.core.application.service.LoginService;
 import pl.vtt.wpi.core.application.util.RequestFactory;
 import pl.vtt.wpi.core.application.util.RequestHandler;
+import pl.vtt.wpi.core.domain.OutputPort;
+import pl.vtt.wpi.core.domain.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
 import pl.vtt.wpi.core.domain.model.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
+import pl.vtt.wpi.core.domain.port.AuthOutputPort;
 
 import static pl.vtt.wpi.core.domain.model.endpoint.Method.POST;
-import static pl.vtt.wpi.core.domain.model.endpoint.RequestTarget.AUTH;
 
 public class LoginServiceImpl implements LoginService {
-    private final RequestFactory<Void> requestFactory;
-    private final RequestHandler<Void, Credentials> requestHandler;
+    private final OutputPort<Credentials> authPort;
 
     @Deprecated(forRemoval = true)
     public LoginServiceImpl(RequestFactory<Void> requestFactory,
                             RequestHandler<Void, Credentials> requestHandler) {
-        this.requestFactory = requestFactory;
-        this.requestHandler = requestHandler;
+        this.authPort = new AuthOutputPort(requestFactory, requestHandler);
     }
 
     public LoginServiceImpl(String url, Supplier<Authorization> authorizationSupplier,
                             RequestHandler<Void, Credentials> requestHandler) {
-        this.requestFactory = new LoginRequestFactory(url, authorizationSupplier);
-        this.requestHandler = requestHandler;
+        this.authPort = new AuthOutputPort(new LoginRequestFactory(url, authorizationSupplier), requestHandler);
+    }
+
+    public LoginServiceImpl(OutputPort<Credentials> authPort) {
+        this.authPort = authPort;
     }
 
     @Override
@@ -52,13 +55,15 @@ public class LoginServiceImpl implements LoginService {
 
     private Credentials getCredentials()
             throws IncorrectUsernameOrPasswordException {
-        Credentials responseBody;
+        final Credentials responseBody;
         try {
-            responseBody = requestHandler.handle(requestFactory.create(POST, AUTH, null));
-        } catch (IncorrectUsernameOrPasswordException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Login failed", e);
+            responseBody = authPort.load();
+        } catch (OutputPortException e) {
+            if (e.getCause() instanceof IncorrectUsernameOrPasswordException incorrect) {
+                throw incorrect;
+            }
+            Throwable cause = e.getCause() == null ? e : e.getCause();
+            throw new RuntimeException("Login failed", cause);
         }
         if (responseBody == null) {
             throw new IncorrectUsernameOrPasswordException();
