@@ -136,7 +136,13 @@ mvn test
 mvn package
 ```
 
-Tests are written with JUnit Jupiter 5 and cover login success, invalid credentials, null/blank inputs, and logout behavior.
+Unit tests are written with JUnit Jupiter 5 and currently verify:
+
+- successful login flow (`Credentials` returned + Authorization header updated),
+- validation for null/blank username and password,
+- incorrect credentials / null auth response handling,
+- cleanup of `AuthorizationHolder` after failed login attempts (including runtime failures),
+- logout behavior.
 
 ## CI
 

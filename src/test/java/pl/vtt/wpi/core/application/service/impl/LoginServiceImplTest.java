@@ -7,6 +7,9 @@ import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.domain.model.Credentials;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LoginServiceImplTest {
@@ -28,14 +31,11 @@ class LoginServiceImplTest {
         try {
             Credentials credentials = instance.login(username, password);
             assertNotNull(credentials);
-            assertNotNull(credentials.username());
-            assertNotNull(credentials.token());
             assertEquals(username, credentials.username());
             assertEquals(token, credentials.token());
             String expectedType = "Basic";
-            String expectedCredentials = new String(
-                    java.util.Base64.getEncoder().encode((username + ":" + token).getBytes())
-            );
+            String expectedCredentials = Base64.getEncoder()
+                    .encodeToString((username + ":" + token).getBytes(StandardCharsets.UTF_8));
             assertEquals(expectedType, AuthorizationHolder.get().type());
             assertEquals(expectedCredentials, AuthorizationHolder.get().credentials());
         } catch (IncorrectUsernameOrPasswordException e) {
@@ -54,6 +54,7 @@ class LoginServiceImplTest {
                 }
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
     }
 
     @Test
@@ -66,6 +67,7 @@ class LoginServiceImplTest {
                 null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
     }
 
     @Test
@@ -78,6 +80,7 @@ class LoginServiceImplTest {
                 null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
     }
 
     @Test
@@ -90,6 +93,7 @@ class LoginServiceImplTest {
                 null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
     }
 
     @Test
@@ -102,6 +106,38 @@ class LoginServiceImplTest {
                 null, AuthorizationHolder::get, _ -> new Credentials(username, token)
         );
         assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
+    }
+
+    @Test
+    @DisplayName("Tests a null response body from request handler")
+    void null_response_body_exception() {
+        String username = "test";
+        String password = "test123";
+        LoginServiceImpl instance = new LoginServiceImpl(
+                null, AuthorizationHolder::get, _ -> null
+        );
+
+        assertThrows(IncorrectUsernameOrPasswordException.class, () -> instance.login(username, password));
+        assertNull(AuthorizationHolder.get());
+    }
+
+    @Test
+    @DisplayName("Tests cleanup when request handler throws runtime exception")
+    void runtime_exception_clears_authorization() {
+        String username = "test";
+        String password = "test123";
+        LoginServiceImpl instance = new LoginServiceImpl(
+                null, AuthorizationHolder::get, _ -> {
+                    throw new IllegalStateException("connection lost");
+                }
+        );
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> instance.login(username, password));
+        assertEquals("Login failed", exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertEquals("connection lost", exception.getCause().getMessage());
+        assertNull(AuthorizationHolder.get());
     }
 
     @Test
