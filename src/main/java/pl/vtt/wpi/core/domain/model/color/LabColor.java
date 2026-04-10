@@ -2,6 +2,9 @@ package pl.vtt.wpi.core.domain.model.color;
 
 public record LabColor(float lightness, float a, float b) {
     public LabColor {
+        if (!Float.isFinite(lightness) || !Float.isFinite(a) || !Float.isFinite(b)) {
+            throw new IllegalArgumentException("Lab components must be finite numbers");
+        }
         if (lightness < 0 || lightness > 100) {
             throw new IllegalArgumentException("Lightness value must be between 0 and 100");
         }

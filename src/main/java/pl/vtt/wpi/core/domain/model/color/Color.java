@@ -22,11 +22,20 @@ public final class Color {
 
     public static CmykColor cmyk(int rgb) {
         RgbColor color = rgb(rgb);
-        int c = Math.toIntExact(Math.round((1 - (color.red() / 255.0)) * 100));
-        int m = Math.toIntExact(Math.round((1 - (color.green() / 255.0)) * 100));
-        int y = Math.toIntExact(Math.round((1 - (color.blue() / 255.0)) * 100));
-        float brightness = Math.max(color.red(), Math.max(color.green(), color.blue())) / 255.0f;
-        int k = Math.toIntExact(Math.round((1 - brightness) * 100));
+        double r = color.red() / 255.0;
+        double g = color.green() / 255.0;
+        double b = color.blue() / 255.0;
+        
+        double kNorm = 1.0 - Math.max(r, Math.max(g, b));
+        int k = (int) Math.round(kNorm * 100);
+        int c, m, y;
+        if (kNorm >= 1.0) {
+            c = 0; m = 0; y = 0;
+        } else {
+            c = (int) Math.round(((1.0 - r - kNorm) / (1.0 - kNorm)) * 100);
+            m = (int) Math.round(((1.0 - g - kNorm) / (1.0 - kNorm)) * 100);
+            y = (int) Math.round(((1.0 - b - kNorm) / (1.0 - kNorm)) * 100);
+        }
         return new CmykColor(c, m, y, k);
     }
 
