@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.domain.exception;
+package pl.vtt.wpi.core.infrastructure.exception;
 
 public class SendingException extends RuntimeException {
     public SendingException(String message) {

@@ -5,16 +5,16 @@ import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.service.LoginService;
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.application.util.RequestHandler;
-import pl.vtt.wpi.core.domain.OutputPort;
-import pl.vtt.wpi.core.domain.exception.OutputPortException;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.infrastructure.RequestHandler;
+import pl.vtt.wpi.core.domain.port.OutputPort;
+import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
-import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
-import pl.vtt.wpi.core.domain.port.AuthOutputPort;
+import pl.vtt.wpi.core.domain.port.output.AuthOutputPort;
 
 import static pl.vtt.wpi.core.domain.model.endpoint.Method.POST;
 

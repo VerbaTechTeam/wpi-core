@@ -1,10 +1,10 @@
-package pl.vtt.wpi.core.domain.port;
+package pl.vtt.wpi.core.domain.port.input;
 
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.domain.InputPort;
-import pl.vtt.wpi.core.domain.RequestSender;
-import pl.vtt.wpi.core.domain.exception.InputPortException;
-import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.domain.port.InputPort;
+import pl.vtt.wpi.core.infrastructure.RequestSender;
+import pl.vtt.wpi.core.domain.port.exception.InputPortException;
+import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 

@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.domain.exception;
+package pl.vtt.wpi.core.domain.port.exception;
 
 public sealed class PortException extends Exception
         permits InputPortException, OutputPortException {

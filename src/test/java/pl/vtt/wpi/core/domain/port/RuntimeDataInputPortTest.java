@@ -4,11 +4,12 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.domain.RequestSender;
-import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.infrastructure.RequestSender;
+import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
+import pl.vtt.wpi.core.domain.port.input.RuntimeDataInputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

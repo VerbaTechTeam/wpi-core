@@ -1,7 +1,5 @@
 package pl.vtt.wpi.core.infrastructure;
 
-import pl.vtt.wpi.core.domain.model.Request;
-
 import java.time.LocalDateTime;
 
 public record Response<T>(LocalDateTime timestamp, Request<?> request, T body, Exception exception) {

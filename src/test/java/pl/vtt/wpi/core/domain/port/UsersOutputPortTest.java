@@ -3,12 +3,13 @@ package pl.vtt.wpi.core.domain.port;
 import java.util.EnumSet;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.application.util.RequestHandler;
-import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.infrastructure.RequestHandler;
+import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.User;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.UserGroup;
+import pl.vtt.wpi.core.domain.port.output.UsersOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

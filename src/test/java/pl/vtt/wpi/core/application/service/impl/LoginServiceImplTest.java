@@ -7,8 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
-import pl.vtt.wpi.core.domain.OutputPort;
-import pl.vtt.wpi.core.domain.exception.OutputPortException;
+import pl.vtt.wpi.core.domain.port.OutputPort;
+import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.Credentials;
 
 import static org.junit.jupiter.api.Assertions.*;

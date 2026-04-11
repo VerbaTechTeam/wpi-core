@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.domain.exception;
+package pl.vtt.wpi.core.domain.port.exception;
 
 public final class OutputPortException extends PortException {
     public OutputPortException(String message) {

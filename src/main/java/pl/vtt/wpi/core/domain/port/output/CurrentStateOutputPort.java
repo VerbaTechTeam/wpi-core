@@ -1,12 +1,12 @@
-package pl.vtt.wpi.core.domain.port;
+package pl.vtt.wpi.core.domain.port.output;
 
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.application.util.RequestHandler;
-import pl.vtt.wpi.core.domain.OutputPort;
-import pl.vtt.wpi.core.domain.exception.OutputPortException;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.infrastructure.RequestHandler;
+import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
+import pl.vtt.wpi.core.domain.port.OutputPort;
 
 public class CurrentStateOutputPort implements OutputPort<CurrentState> {
     private final RequestFactory<Void> requestFactory;

@@ -1,5 +1,6 @@
-package pl.vtt.wpi.core.domain.model;
+package pl.vtt.wpi.core.infrastructure;
 
+import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 
 import java.time.LocalDateTime;

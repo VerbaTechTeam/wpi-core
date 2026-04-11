@@ -1,6 +1,5 @@
-package pl.vtt.wpi.core.application.util;
+package pl.vtt.wpi.core.infrastructure;
 
-import pl.vtt.wpi.core.domain.model.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 

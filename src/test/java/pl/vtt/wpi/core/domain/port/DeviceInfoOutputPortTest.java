@@ -2,12 +2,13 @@ package pl.vtt.wpi.core.domain.port;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.util.RequestFactory;
-import pl.vtt.wpi.core.application.util.RequestHandler;
-import pl.vtt.wpi.core.domain.exception.OutputPortException;
-import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.infrastructure.RequestFactory;
+import pl.vtt.wpi.core.infrastructure.RequestHandler;
+import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
+import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.DeviceInfo;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
+import pl.vtt.wpi.core.domain.port.output.DeviceInfoOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
