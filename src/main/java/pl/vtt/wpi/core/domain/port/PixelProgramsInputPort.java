@@ -1,0 +1,37 @@
+package pl.vtt.wpi.core.domain.port;
+
+import java.util.List;
+import pl.vtt.wpi.core.application.util.RequestFactory;
+import pl.vtt.wpi.core.domain.InputPort;
+import pl.vtt.wpi.core.domain.RequestSender;
+import pl.vtt.wpi.core.domain.exception.InputPortException;
+import pl.vtt.wpi.core.domain.model.Request;
+import pl.vtt.wpi.core.domain.model.device.PixelProgram;
+import pl.vtt.wpi.core.domain.model.endpoint.Method;
+import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
+
+public class PixelProgramsInputPort implements InputPort<List<PixelProgram>> {
+    private final RequestFactory<List<PixelProgram>> requestFactory;
+    private final RequestSender requestSender;
+
+    public PixelProgramsInputPort(RequestFactory<List<PixelProgram>> requestFactory,
+                                  RequestSender requestSender) {
+        this.requestFactory = requestFactory;
+        this.requestSender = requestSender;
+    }
+
+    @Override
+    public void send(List<PixelProgram> obj) throws InputPortException {
+        if (obj == null) {
+            throw new InputPortException("Pixel programs cannot be null");
+        }
+        try {
+            Request<List<PixelProgram>> request = requestFactory.create(
+                    Method.PUT, RequestTarget.PIXEL_PROGRAMS_UPDATE, obj
+            );
+            requestSender.send(request);
+        } catch (Exception e) {
+            throw new InputPortException("Cannot send pixel programs", e);
+        }
+    }
+}
