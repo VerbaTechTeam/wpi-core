@@ -24,6 +24,9 @@ public class UsersOutputPort implements OutputPort<List<User>> {
         try {
             return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.USERS_READ, null));
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new OutputPortException("Cannot load users", e);
         }
     }

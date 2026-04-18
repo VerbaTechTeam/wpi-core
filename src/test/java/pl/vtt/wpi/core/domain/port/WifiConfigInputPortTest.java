@@ -29,8 +29,9 @@ class WifiConfigInputPortTest {
 
     @Test
     void send_throwsWhenSsidOrPasswordMissing() {
-        WifiConfigInputPort port = new WifiConfigInputPort((method, target, payload) -> null, request -> {});
+        WifiConfigInputPort port = new WifiConfigInputPort((_, _, _) -> null, _ -> {});
 
+        assertThrows(InputPortException.class, () -> port.send(new WifiConfig(null, "pass")));
         assertThrows(InputPortException.class, () -> port.send(new WifiConfig("ssid", null)));
     }
 }

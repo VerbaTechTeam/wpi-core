@@ -19,8 +19,8 @@ class PixelProgramsInputPortTest {
 
     @Test
     void send_throwsWhenProgramsNull() {
-        RequestFactory<List<PixelProgram>> requestFactory = (method, target, payload) -> null;
-        RequestSender requestSender = request -> {};
+        RequestFactory<List<PixelProgram>> requestFactory = (_, _, _) -> null;
+        RequestSender requestSender = _ -> {};
         PixelProgramsInputPort port = new PixelProgramsInputPort(requestFactory, requestSender);
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));

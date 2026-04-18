@@ -28,6 +28,9 @@ public class WifiConfigInputPort implements InputPort<WifiConfig> {
         if (obj.ssid() == null || obj.password() == null) {
             throw new InputPortException("SSID and password cannot be null");
         }
+        if (obj.ssid().isBlank()) {
+            throw new InputPortException("SSID cannot be blank");
+        }
         try {
             Request<WifiConfig> request = requestFactory.create(Method.PATCH,
                     RequestTarget.WIFI_UPDATE, obj

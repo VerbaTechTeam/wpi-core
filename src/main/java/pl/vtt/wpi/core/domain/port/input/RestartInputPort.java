@@ -24,6 +24,9 @@ public class RestartInputPort implements InputPort<Void> {
             Request<Void> request = requestFactory.create(Method.POST, RequestTarget.RESTART, null);
             requestSender.send(request);
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new InputPortException("Cannot restart device", e);
         }
     }

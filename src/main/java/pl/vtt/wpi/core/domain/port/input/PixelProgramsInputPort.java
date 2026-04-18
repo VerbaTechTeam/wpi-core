@@ -26,6 +26,14 @@ public class PixelProgramsInputPort implements InputPort<List<PixelProgram>> {
             throw new InputPortException("Pixel programs cannot be null");
         }
         try {
+            if (obj.contains(null)) {
+                throw new InputPortException("Pixel programs list cannot contain null elements");
+            }
+        } catch (NullPointerException _) {
+            // contains() may throw NullPointerException
+            // if obj is not a List implementation that supports null elements
+        }
+        try {
             Request<List<PixelProgram>> request = requestFactory.create(
                     Method.PUT, RequestTarget.PIXEL_PROGRAMS_UPDATE, obj
             );

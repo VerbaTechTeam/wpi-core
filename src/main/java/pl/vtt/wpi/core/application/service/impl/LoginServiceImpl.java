@@ -16,8 +16,6 @@ import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 import pl.vtt.wpi.core.domain.port.output.AuthOutputPort;
 
-import static pl.vtt.wpi.core.domain.model.endpoint.Method.POST;
-
 public class LoginServiceImpl implements LoginService {
     private final OutputPort<Credentials> authPort;
 
@@ -27,9 +25,8 @@ public class LoginServiceImpl implements LoginService {
         this.authPort = new AuthOutputPort(requestFactory, requestHandler);
     }
 
-    public LoginServiceImpl(String url, Supplier<Authorization> authorizationSupplier,
-                            RequestHandler<Void, Credentials> requestHandler) {
-        this.authPort = new AuthOutputPort(new LoginRequestFactory(url, authorizationSupplier), requestHandler);
+    public LoginServiceImpl(String url, RequestHandler<Void, Credentials> requestHandler) {
+        this.authPort = new AuthOutputPort(new LoginRequestFactory(url, AuthorizationHolder::get), requestHandler);
     }
 
     public LoginServiceImpl(OutputPort<Credentials> authPort) {
@@ -75,7 +72,7 @@ public class LoginServiceImpl implements LoginService {
             implements RequestFactory<Void> {
         @Override
         public Request<Void> create(Method method, RequestTarget target, Void payload) {
-            return new Request<>(LocalDateTime.now(), POST, url, supplier.get(), null);
+            return new Request<>(LocalDateTime.now(), method, url, supplier.get(), null);
         }
     }
 }

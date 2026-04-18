@@ -23,6 +23,9 @@ public class DeviceInfoOutputPort implements OutputPort<DeviceInfo> {
         try {
             return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.INFO, null));
         } catch (Exception e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new OutputPortException("Cannot load device info", e);
         }
     }

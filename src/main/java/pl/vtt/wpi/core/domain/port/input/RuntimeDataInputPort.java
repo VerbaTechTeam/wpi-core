@@ -25,15 +25,19 @@ public class RuntimeDataInputPort implements InputPort<RuntimeData> {
         if (obj == null) {
             throw new InputPortException("Runtime data cannot be null");
         }
-        Method method = Method.PUT;
-        if (obj.nol() == null || obj.brightness() == null || obj.on() == null
-                || obj.overflow() == null || obj.sensorDependency() == null
-                || obj.timeDependency() == null || obj.defaultRestartCountdown() == null
-                || obj.offTime() == null || obj.onTime() == null
-                || obj.zoneId() == null || obj.pixelProgram() == null
-                || obj.stepTime() == null) {
-            method = Method.PATCH;
-        }
+        boolean hasCoreFields = obj.nol() != null
+                && obj.brightness() != null
+                && obj.on() != null
+                && obj.overflow() != null
+                && obj.sensorDependency() != null
+                && obj.timeDependency() != null
+                && obj.defaultRestartCountdown() != null
+                && obj.pixelProgram() != null
+                && obj.stepTime() != null;
+        boolean hasTimeFields =
+                Boolean.FALSE.equals(obj.timeDependency())
+                        || (obj.onTime() != null && obj.offTime() != null && obj.zoneId() != null);
+        Method method = hasCoreFields && hasTimeFields ? Method.PUT : Method.PATCH;
         try {
             Request<RuntimeData> request = requestFactory.create(
                     method, RequestTarget.DATA_UPDATE, obj
