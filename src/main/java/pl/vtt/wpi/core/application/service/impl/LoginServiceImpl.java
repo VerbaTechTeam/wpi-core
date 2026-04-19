@@ -15,6 +15,7 @@ import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 import pl.vtt.wpi.core.domain.port.output.AuthOutputPort;
+import pl.vtt.wpi.core.infrastructure.factory.EmptyUrlVariablesRequestFactory;
 
 public class LoginServiceImpl implements LoginService {
     private final OutputPort<Credentials> authPort;
@@ -26,7 +27,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     public LoginServiceImpl(String url, RequestHandler<Void, Credentials> requestHandler) {
-        this.authPort = new AuthOutputPort(new LoginRequestFactory(url, AuthorizationHolder::get), requestHandler);
+        this.authPort = new AuthOutputPort(new EmptyUrlVariablesRequestFactory<>(url), requestHandler);
     }
 
     public LoginServiceImpl(OutputPort<Credentials> authPort) {
@@ -66,13 +67,5 @@ public class LoginServiceImpl implements LoginService {
             throw new IncorrectUsernameOrPasswordException();
         }
         return responseBody;
-    }
-
-    private record LoginRequestFactory(String url, Supplier<Authorization> supplier)
-            implements RequestFactory<Void> {
-        @Override
-        public Request<Void> create(Method method, RequestTarget target, Void payload) {
-            return new Request<>(LocalDateTime.now(), method, url, supplier.get(), null);
-        }
     }
 }
