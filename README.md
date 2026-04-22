@@ -1,6 +1,6 @@
 # WPI Core
 
-**WPI Core** is a Java library providing foundational abstractions for secure API communication, including authentication, endpoint access control, and request/response modeling, designed to be consumed by higher-level WPI client implementations.
+**WPI Core** is a Java library providing foundational abstractions for secure API communication, including authentication, endpoint access control, request/response modeling, and application-level service contracts for WPI clients.
 
 Part of the **Waterflow Pixel (WP)** ecosystem developed by [VerbaTechTeam](https://github.com/VerbaTechTeam) — *We create words that devices understand.*
 
@@ -12,7 +12,7 @@ Part of the **Waterflow Pixel (WP)** ecosystem developed by [VerbaTechTeam](http
 
 | Repository | Layer | Description |
 |---|---|---|
-| **wpi-core** *(this repo)* | WPI | Core API abstractions in Java — auth, endpoints, request model |
+| **wpi-core** *(this repo)* | WPI | Core API abstractions in Java — auth, endpoints, request model, service contracts |
 | [waterflow-pixel-unit](https://github.com/VerbaTechTeam/waterflow-pixel-unit) | WPU | MicroPython firmware for Raspberry Pi Pico 2W with built-in REST HTTP server for direct LED strip control |
 
 For a full overview of the system architecture and roadmap (including the planned **WPC** controller layer and **wpu-emulator**), see the [VerbaTechTeam organization profile](https://github.com/VerbaTechTeam).
@@ -48,39 +48,35 @@ Then reference it in your project's `pom.xml`:
 
 ## Architecture
 
-The library follows a clean, layered architecture:
+The library follows a layered architecture:
 
 ```
 pl.vtt.wpi.core
 ├── application
 │   ├── config       # AuthorizationHolder (thread-local auth state)
-│   ├── exception    # Domain exceptions (e.g. IncorrectUsernameOrPasswordException)
-│   ├── service      # Service interfaces (LoginService)
-│   │   └── impl     # Internal implementations (not exported)
-│   └── util         # RequestFactory, RequestHandler interfaces
-└── domain
-    └── model
-        ├── Authorization.java
-        ├── Credentials.java
-        ├── Request.java
-        └── endpoint
-            ├── EndpointDescriptor.java
-            ├── Method.java
-            ├── RequestTarget.java
-            ├── Resource.java
-            └── UserGroup.java
+│   ├── exception    # Application-level exceptions
+│   └── service
+│       ├── ...      # Service interfaces (LoginService, RuntimeDataService, etc.)
+│       └── impl     # Internal service implementations
+├── domain
+│   ├── dto
+│   ├── model
+│   └── port         # Input/Output port contracts + endpoint-specific port implementations
+└── infrastructure
+    ├── Request / Response
+    ├── RequestFactory / RequestHandler / RequestSender
+    └── factory      # SynchronizedRequestFactory
 ```
 
 ## Key Concepts
 
 ### Authentication
 
-Login is handled by `LoginService`. Internally, `LoginServiceImpl` delegates authorization to a dedicated port (`AuthOutputPort`), so request execution is decoupled from service orchestration.
+Login is handled by `LoginService`. Internally, `LoginServiceImpl` delegates authorization to a dedicated output port (`AuthOutputPort`), so request execution is decoupled from service orchestration.
 
-On success, the resulting `Credentials` (username + token) are stored as a Basic Auth header in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
+On success, resulting `Credentials` (username + token) are stored in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
 
 ```java
-// Provided by a higher-level module
 LoginService loginService = ...;
 
 Credentials credentials = loginService.login("admin", "password");
@@ -108,29 +104,37 @@ boolean allowed = RequestTarget.DATA_UPDATE.allow(Method.PUT, userGroups);
 
 ### Request Model
 
-A `Request<T>` carries the target URL, authorization header, and an optional typed payload:
+A `Request<T>` carries timestamp, HTTP method, target URL, authorization header, and an optional typed payload:
 
 ```java
-record Request<T>(Method method, String url, Authorization authorization, T payload) {}
+Request<T> request = new Request<>(
+    null,          // timestamp (null => now)
+    Method.GET,
+    "https://host/api/data",
+    authorization,
+    payload
+);
 ```
 
-### Implementing a Client
+### Application Services
 
-`wpi-core` exposes only the `LoginService` interface — the implementation is internal to the module. A higher-level module (e.g. `wpi-desktop`) is responsible for instantiating the service and exposing it to the client.
+The package `pl.vtt.wpi.core.application.service` currently exposes interfaces for:
 
-From the client's perspective, usage is limited to the public interface:
+- `LoginService`
+- `AdminPasswordService`
+- `UserManagementService`
+- `RuntimeDataService`
+- `PixelProgramService`
+- `NetworkConfigurationService`
+- `DeviceInfoService`
+- `DebugService`
+- `RebootService`
 
-```java
-// Provided by a higher-level module
-LoginService loginService = ...;
-
-Credentials credentials = loginService.login("admin", "password");
-loginService.logout();
-```
+Concrete implementations are provided in `pl.vtt.wpi.core.application.service.impl`.
 
 ### Domain Ports
 
-The package `pl.vtt.wpi.core.domain.port` contains concrete port implementations for domain operations:
+The package `pl.vtt.wpi.core.domain.port` contains port contracts and endpoint-specific implementations:
 
 - **Output ports**: `AuthOutputPort`, `DeviceInfoOutputPort`, `RuntimeDataOutputPort`, `CurrentStateOutputPort`, `PixelProgramsOutputPort`, `UsersOutputPort`
 - **Input ports**: `RuntimeDataInputPort`, `WifiConfigInputPort`, `PixelProgramsInputPort`, `UserCreateInputPort`, `RestartInputPort`, `LogsDeleteInputPort`
@@ -147,13 +151,7 @@ mvn test
 mvn package
 ```
 
-Unit tests are written with JUnit Jupiter 5 and currently verify:
-
-- successful login flow (`Credentials` returned + Authorization header updated),
-- validation for null/blank username and password,
-- incorrect credentials / null auth response handling,
-- cleanup of `AuthorizationHolder` after failed login attempts (including runtime failures),
-- logout behavior.
+Unit tests are written with JUnit Jupiter 5 and currently include coverage for core port behaviors and login service logic.
 
 ## CI
 
