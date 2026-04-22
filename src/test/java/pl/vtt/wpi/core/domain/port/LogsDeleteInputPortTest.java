@@ -15,7 +15,7 @@ class LogsDeleteInputPortTest {
     void send_usesDeleteMethod() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
         RequestFactory<Void> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
 
         LogsDeleteInputPort port = new LogsDeleteInputPort(requestFactory, requestSender);

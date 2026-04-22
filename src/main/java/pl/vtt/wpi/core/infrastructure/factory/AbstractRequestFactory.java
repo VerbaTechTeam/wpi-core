@@ -1,6 +1,5 @@
 package pl.vtt.wpi.core.infrastructure.factory;
 
-import java.time.LocalDateTime;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
@@ -17,10 +16,10 @@ public sealed abstract class AbstractRequestFactory<T> implements RequestFactory
 
     @Override
     public Request<T> create(Method method, RequestTarget target, T body) {
-        return new Request<>(LocalDateTime.now(), method,
-                target.descriptor().resource().url(baseUrl, getUrlVariables(target)),
+        return new Request<>(null, method,
+                target.url(baseUrl, getUrlVariables(target)),
                 AuthorizationHolder.get(), body);
     }
 
-    public abstract Object[] getUrlVariables(RequestTarget target);
+    protected abstract Object[] getUrlVariables(RequestTarget target);
 }

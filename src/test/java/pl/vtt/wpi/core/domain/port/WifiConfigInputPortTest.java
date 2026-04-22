@@ -18,7 +18,7 @@ class WifiConfigInputPortTest {
     void send_usesPatchMethod() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
         RequestFactory<WifiConfig> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
         WifiConfigInputPort port = new WifiConfigInputPort(requestFactory, requestSender);
 

@@ -15,7 +15,7 @@ class PixelProgramsOutputPortTest {
     @Test
     void load_usesGetMethod() throws Exception {
         RequestFactory<Void> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestHandler<Void, List<PixelProgram>> requestHandler = request -> {
             assertEquals(Method.GET, request.method());
             return List.of(new PixelProgram(0, List.of()));

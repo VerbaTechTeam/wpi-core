@@ -17,10 +17,10 @@ class DeviceInfoOutputPortTest {
 
     @Test
     void load_readsDeviceInfoFromInfoEndpoint() throws Exception {
-        RequestFactory<Void> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, null);
+        RequestFactory<Void> requestFactory = (method, target, _) ->
+                new Request<>(null, method, target.url("http://localhost"), null, null);
         RequestHandler<Void, DeviceInfo> requestHandler = request -> {
-            assertEquals(RequestTarget.INFO.descriptor().resource().url("http://localhost"), request.url());
+            assertEquals(RequestTarget.INFO.url("http://localhost"), request.url());
             return new DeviceInfo(UUID.randomUUID(), "VTT", "WP", "wpi", "1.0", "VTT", "test@vtt.pl");
         };
 
@@ -32,8 +32,8 @@ class DeviceInfoOutputPortTest {
 
     @Test
     void load_wrapsException() {
-        RequestFactory<Void> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, null);
+        RequestFactory<Void> requestFactory = (method, target, _) ->
+                new Request<>(null, method, target.url("http://localhost"), null, null);
         RequestHandler<Void, DeviceInfo> requestHandler = request -> {
             throw new IllegalStateException("boom");
         };

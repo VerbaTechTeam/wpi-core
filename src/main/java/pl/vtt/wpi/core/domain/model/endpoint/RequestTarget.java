@@ -70,4 +70,8 @@ public enum RequestTarget {
         }
         return descriptor().allowedMethods().contains(method);
     }
+
+    public String url(String baseUrl, Object... args) {
+        return descriptor.resource().url(baseUrl, args);
+    }
 }

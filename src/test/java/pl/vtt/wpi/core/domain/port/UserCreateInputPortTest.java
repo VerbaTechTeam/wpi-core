@@ -28,7 +28,8 @@ class UserCreateInputPortTest {
         AtomicReference<User> usedPayload = new AtomicReference<>();
         AtomicReference<Request<?>> sentRequest = new AtomicReference<>();
 
-        Request<User> request = new Request<>(null, Method.POST, "http://localhost/api/secure/users", null, user);
+        Request<User> request = new Request<>(null, Method.POST,
+                RequestTarget.USERS_CREATE.url("http://localhost"), null, user);
         RequestFactory<User> requestFactory = (method, target, payload) -> {
             usedMethod.set(method);
             usedTarget.set(target);
@@ -49,7 +50,7 @@ class UserCreateInputPortTest {
 
     @Test
     void send_nullUser_throwsInputPortException() {
-        UserCreateInputPort port = new UserCreateInputPort((method, target, payload) -> null, req -> {});
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _) -> null, _ -> {});
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));
 
@@ -59,10 +60,10 @@ class UserCreateInputPortTest {
     @Test
     void send_factoryException_wrapsWithCause() {
         RuntimeException originalCause = new RuntimeException("factory failure");
-        RequestFactory<User> requestFactory = (method, target, payload) -> {
+        RequestFactory<User> requestFactory = (_, _, _) -> {
             throw originalCause;
         };
-        RequestSender requestSender = request -> {};
+        RequestSender requestSender = _ -> {};
 
         UserCreateInputPort port = new UserCreateInputPort(requestFactory, requestSender);
 
@@ -79,8 +80,8 @@ class UserCreateInputPortTest {
         RuntimeException originalCause = new RuntimeException("send failure");
 
         RequestFactory<User> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
-        RequestSender requestSender = request -> {
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
+        RequestSender requestSender = _ -> {
             throw originalCause;
         };
 

@@ -17,7 +17,7 @@ class RestartInputPortTest {
     void send_usesPostMethod() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
         RequestFactory<Void> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
 
         RestartInputPort port = new RestartInputPort(requestFactory, requestSender);
@@ -28,9 +28,9 @@ class RestartInputPortTest {
 
     @Test
     void send_wrapsException() {
-        RestartInputPort port = new RestartInputPort((method, target, payload) -> {
+        RestartInputPort port = new RestartInputPort((_, _, _) -> {
             throw new RuntimeException("boom");
-        }, request -> {});
+        }, _ -> {});
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));
         assertEquals("Cannot restart device", exception.getMessage());

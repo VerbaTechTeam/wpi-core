@@ -31,7 +31,7 @@ class PixelProgramsInputPortTest {
     void send_sendsPutRequest() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
         RequestFactory<List<PixelProgram>> requestFactory = (method, target, payload) ->
-                new Request<>(null, method, target.descriptor().resource().url("http://localhost"), null, payload);
+                new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
 
         PixelProgramsInputPort port = new PixelProgramsInputPort(requestFactory, requestSender);
