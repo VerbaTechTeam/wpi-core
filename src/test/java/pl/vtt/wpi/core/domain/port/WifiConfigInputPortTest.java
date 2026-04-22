@@ -17,7 +17,7 @@ class WifiConfigInputPortTest {
     @Test
     void send_usesPatchMethod() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
-        RequestFactory<WifiConfig> requestFactory = (method, target, payload) ->
+        RequestFactory<WifiConfig> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
         WifiConfigInputPort port = new WifiConfigInputPort(requestFactory, requestSender);
@@ -29,7 +29,7 @@ class WifiConfigInputPortTest {
 
     @Test
     void send_throwsWhenSsidOrPasswordMissing() {
-        WifiConfigInputPort port = new WifiConfigInputPort((_, _, _) -> null, _ -> {});
+        WifiConfigInputPort port = new WifiConfigInputPort((_, _, _, _) -> null, _ -> {});
 
         assertThrows(InputPortException.class, () -> port.send(new WifiConfig(null, "pass")));
         assertThrows(InputPortException.class, () -> port.send(new WifiConfig("ssid", null)));

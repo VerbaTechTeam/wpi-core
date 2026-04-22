@@ -32,8 +32,8 @@ public class WifiConfigInputPort implements InputPort<WifiConfig> {
             throw new InputPortException("SSID cannot be blank");
         }
         try {
-            Request<WifiConfig> request = requestFactory.create(Method.PATCH,
-                    RequestTarget.WIFI_UPDATE, obj
+            Request<WifiConfig> request = requestFactory.create(obj, Method.PATCH,
+                    RequestTarget.WIFI_UPDATE
             );
             requestSender.send(request);
         } catch (Exception e) {

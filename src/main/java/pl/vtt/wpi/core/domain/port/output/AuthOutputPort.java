@@ -21,7 +21,7 @@ public class AuthOutputPort implements OutputPort<Credentials> {
     @Override
     public Credentials load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.POST, RequestTarget.AUTH, null));
+            return requestHandler.handle(requestFactory.create(null, Method.POST, RequestTarget.AUTH));
         } catch (Exception e) {
             throw new OutputPortException("Cannot authorize user", e);
         }

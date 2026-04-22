@@ -25,7 +25,7 @@ public class UserCreateInputPort implements InputPort<User> {
             throw new InputPortException("User cannot be null");
         }
         try {
-            Request<User> request = requestFactory.create(Method.POST, RequestTarget.USERS_CREATE, obj);
+            Request<User> request = requestFactory.create(obj, Method.POST, RequestTarget.USERS_CREATE);
             requestSender.send(request);
         } catch (Exception e) {
             throw new InputPortException("Cannot create user", e);

@@ -35,7 +35,7 @@ public class PixelProgramsInputPort implements InputPort<List<PixelProgram>> {
         }
         try {
             Request<List<PixelProgram>> request = requestFactory.create(
-                    Method.PUT, RequestTarget.PIXEL_PROGRAMS_UPDATE, obj
+                    obj, Method.PUT, RequestTarget.PIXEL_PROGRAMS_UPDATE
             );
             requestSender.send(request);
         } catch (Exception e) {

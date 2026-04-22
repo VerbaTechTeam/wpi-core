@@ -40,7 +40,7 @@ public class RuntimeDataInputPort implements InputPort<RuntimeData> {
         Method method = hasCoreFields && hasTimeFields ? Method.PUT : Method.PATCH;
         try {
             Request<RuntimeData> request = requestFactory.create(
-                    method, RequestTarget.DATA_UPDATE, obj
+                    obj, method, RequestTarget.DATA_UPDATE
             );
             requestSender.send(request);
         } catch (Exception e) {

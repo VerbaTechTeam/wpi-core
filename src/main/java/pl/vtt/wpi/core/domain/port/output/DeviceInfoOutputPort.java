@@ -21,7 +21,7 @@ public class DeviceInfoOutputPort implements OutputPort<DeviceInfo> {
     @Override
     public DeviceInfo load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.INFO, null));
+            return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.INFO));
         } catch (Exception e) {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();

@@ -40,28 +40,27 @@ public enum Resource {
     public int pathVariableCount() {
         int count = 0;
         for (int i = 0; i < path.length(); i++) {
-            if (path.charAt(i) == '%' && i + 1 < path.length()) {
-                char nextChar = path.charAt(i + 1);
-                if (SUPPORTED_CONVERSIONS.indexOf(nextChar) >= 0) {
-                    count++;
-                } else if (!isHexDigit(nextChar)) {
-                    for (int j = i + 1; j < path.length(); j++) {
-                        char c = path.charAt(j);
-                        if (SUPPORTED_CONVERSIONS.indexOf(c) >= 0) {
-                            count++;
-                            break;
-                        } else if (!isFormatModifier(c)) {
-                            break;
-                        }
-                    }
-                }
+            if (path.charAt(i) != '%' || i + 1 >= path.length()) {
+                continue;
+            }
+            int j = i + 1;
+            // skip flags / width / precision / argument-index prefix
+            while (j < path.length() && isFormatModifier(path.charAt(j))) {
+                j++;
+            }
+            if (j >= path.length()) {
+                break;
+            }
+            char conv = path.charAt(j);
+            if (conv == '%' || conv == 'n') {
+                // literal % or newline — no argument consumed
+                i = j;
+            } else if (SUPPORTED_CONVERSIONS.indexOf(conv) >= 0) {
+                count++;
+                i = j;
             }
         }
         return count;
-    }
-
-    private boolean isHexDigit(char c) {
-        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 
     private boolean isFormatModifier(char c) {
@@ -70,16 +69,16 @@ public enum Resource {
     }
 
     String url(String baseUrl, Object... args) {
-        args = Arrays.stream(args)
-                .map(arg -> URLEncoder
-                        .encode(String.valueOf(arg), StandardCharsets.UTF_8)
-                        .replace("+", "%20"))
-                .toArray();
         int requiredArgs = pathVariableCount();
         if (args.length != requiredArgs) {
             throw new IllegalArgumentException("Expected " + requiredArgs
                     + " arguments but got " + args.length);
         }
+        args = Arrays.stream(args)
+                .map(arg -> URLEncoder
+                        .encode(String.valueOf(arg), StandardCharsets.UTF_8)
+                        .replace("+", "%20"))
+                .toArray();
         String formatted = requiredArgs == 0 ? path : path.formatted(args);
         return baseUrl == null ? formatted : baseUrl + formatted;
     }

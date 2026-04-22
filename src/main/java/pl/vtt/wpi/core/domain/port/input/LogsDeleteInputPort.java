@@ -21,7 +21,7 @@ public class LogsDeleteInputPort implements InputPort<Void> {
     @Override
     public void send(Void obj) throws InputPortException {
         try {
-            Request<Void> request = requestFactory.create(Method.DELETE, RequestTarget.LOGS_DELETE, null);
+            Request<Void> request = requestFactory.create(null, Method.DELETE, RequestTarget.LOGS_DELETE);
             requestSender.send(request);
         } catch (Exception e) {
             throw new InputPortException("Cannot delete logs", e);

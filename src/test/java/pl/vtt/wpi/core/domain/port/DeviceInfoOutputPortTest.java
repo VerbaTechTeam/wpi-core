@@ -10,14 +10,13 @@ import pl.vtt.wpi.core.domain.model.device.DeviceInfo;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
 import pl.vtt.wpi.core.domain.port.output.DeviceInfoOutputPort;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DeviceInfoOutputPortTest {
 
     @Test
     void load_readsDeviceInfoFromInfoEndpoint() throws Exception {
-        RequestFactory<Void> requestFactory = (method, target, _) ->
+        RequestFactory<Void> requestFactory = (_, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, null);
         RequestHandler<Void, DeviceInfo> requestHandler = request -> {
             assertEquals(RequestTarget.INFO.url("http://localhost"), request.url());
@@ -28,19 +27,25 @@ class DeviceInfoOutputPortTest {
 
         DeviceInfo result = port.load();
         assertEquals("VTT", result.manufacturer());
+        assertEquals("WP", result.productName());
+        assertEquals("wpi", result.applicationName());
+        assertEquals("1.0", result.applicationVersion());
+        assertEquals("VTT", result.applicationAuthor());
+        assertEquals("test@vtt.pl", result.applicationAuthorEmail());
     }
 
     @Test
     void load_wrapsException() {
-        RequestFactory<Void> requestFactory = (method, target, _) ->
+        RequestFactory<Void> requestFactory = (_, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, null);
-        RequestHandler<Void, DeviceInfo> requestHandler = request -> {
+        RequestHandler<Void, DeviceInfo> requestHandler = _ -> {
             throw new IllegalStateException("boom");
         };
 
         DeviceInfoOutputPort port = new DeviceInfoOutputPort(requestFactory, requestHandler);
 
         OutputPortException exception = assertThrows(OutputPortException.class, port::load);
+        assertInstanceOf(IllegalStateException.class, exception.getCause());
         assertEquals("Cannot load device info", exception.getMessage());
     }
 }

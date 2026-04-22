@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RuntimeDataOutputPortTest {
     @Test
     void load_usesGetMethod() throws Exception {
-        RequestFactory<Void> requestFactory = (method, target, payload) ->
+        RequestFactory<Void> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestHandler<Void, RuntimeData> requestHandler = request -> {
             assertEquals(Method.GET, request.method());

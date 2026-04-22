@@ -1,34 +1,14 @@
 package pl.vtt.wpi.core.application.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.function.Supplier;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
 import pl.vtt.wpi.core.application.service.LoginService;
-import pl.vtt.wpi.core.infrastructure.RequestFactory;
-import pl.vtt.wpi.core.infrastructure.RequestHandler;
 import pl.vtt.wpi.core.domain.port.OutputPort;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
-import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
-import pl.vtt.wpi.core.infrastructure.Request;
-import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
-import pl.vtt.wpi.core.domain.port.output.AuthOutputPort;
-import pl.vtt.wpi.core.infrastructure.factory.EmptyUrlVariablesRequestFactory;
 
 public class LoginServiceImpl implements LoginService {
     private final OutputPort<Credentials> authPort;
-
-    @Deprecated(forRemoval = true)
-    public LoginServiceImpl(RequestFactory<Void> requestFactory,
-                            RequestHandler<Void, Credentials> requestHandler) {
-        this.authPort = new AuthOutputPort(requestFactory, requestHandler);
-    }
-
-    public LoginServiceImpl(String url, RequestHandler<Void, Credentials> requestHandler) {
-        this.authPort = new AuthOutputPort(new EmptyUrlVariablesRequestFactory<>(url), requestHandler);
-    }
 
     public LoginServiceImpl(OutputPort<Credentials> authPort) {
         this.authPort = authPort;

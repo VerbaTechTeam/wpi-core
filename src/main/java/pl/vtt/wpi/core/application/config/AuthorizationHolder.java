@@ -1,6 +1,5 @@
 package pl.vtt.wpi.core.application.config;
 
-import java.util.Objects;
 import pl.vtt.wpi.core.domain.model.Authorization;
 import pl.vtt.wpi.core.domain.model.Credentials;
 

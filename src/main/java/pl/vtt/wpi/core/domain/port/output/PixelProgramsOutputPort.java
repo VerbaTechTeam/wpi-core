@@ -22,7 +22,7 @@ public class PixelProgramsOutputPort implements OutputPort<List<PixelProgram>> {
     @Override
     public List<PixelProgram> load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.PIXEL_PROGRAMS_READ, null));
+            return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.PIXEL_PROGRAMS_READ));
         } catch (Exception e) {
             throw new OutputPortException("Cannot load pixel programs", e);
         }

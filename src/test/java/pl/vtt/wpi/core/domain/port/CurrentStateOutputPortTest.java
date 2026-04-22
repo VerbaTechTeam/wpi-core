@@ -9,11 +9,12 @@ import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.port.output.CurrentStateOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CurrentStateOutputPortTest {
     @Test
     void load_usesGetMethod() throws Exception {
-        RequestFactory<Void> requestFactory = (method, target, payload) ->
+        RequestFactory<Void> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestHandler<Void, CurrentState> requestHandler = request -> {
             assertEquals(Method.GET, request.method());
@@ -21,6 +22,6 @@ class CurrentStateOutputPortTest {
         };
         CurrentStateOutputPort port = new CurrentStateOutputPort(requestFactory, requestHandler);
 
-        assertEquals(true, port.load().alive());
+        assertTrue(port.load().alive());
     }
 }

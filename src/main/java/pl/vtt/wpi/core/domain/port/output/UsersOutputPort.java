@@ -22,7 +22,7 @@ public class UsersOutputPort implements OutputPort<List<User>> {
     @Override
     public List<User> load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.USERS_READ, null));
+            return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.USERS_READ));
         } catch (Exception e) {
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();

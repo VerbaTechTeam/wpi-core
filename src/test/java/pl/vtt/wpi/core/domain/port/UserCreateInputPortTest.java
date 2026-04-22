@@ -30,7 +30,7 @@ class UserCreateInputPortTest {
 
         Request<User> request = new Request<>(null, Method.POST,
                 RequestTarget.USERS_CREATE.url("http://localhost"), null, user);
-        RequestFactory<User> requestFactory = (method, target, payload) -> {
+        RequestFactory<User> requestFactory = (payload, method, target, _) -> {
             usedMethod.set(method);
             usedTarget.set(target);
             usedPayload.set(payload);
@@ -50,7 +50,7 @@ class UserCreateInputPortTest {
 
     @Test
     void send_nullUser_throwsInputPortException() {
-        UserCreateInputPort port = new UserCreateInputPort((_, _, _) -> null, _ -> {});
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));
 
@@ -60,7 +60,7 @@ class UserCreateInputPortTest {
     @Test
     void send_factoryException_wrapsWithCause() {
         RuntimeException originalCause = new RuntimeException("factory failure");
-        RequestFactory<User> requestFactory = (_, _, _) -> {
+        RequestFactory<User> requestFactory = (_, _, _, _) -> {
             throw originalCause;
         };
         RequestSender requestSender = _ -> {};
@@ -79,7 +79,7 @@ class UserCreateInputPortTest {
         User user = new User("admin", EnumSet.of(UserGroup.ADMIN));
         RuntimeException originalCause = new RuntimeException("send failure");
 
-        RequestFactory<User> requestFactory = (method, target, payload) ->
+        RequestFactory<User> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = _ -> {
             throw originalCause;

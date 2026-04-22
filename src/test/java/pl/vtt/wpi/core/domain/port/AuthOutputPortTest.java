@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AuthOutputPortTest {
     @Test
     void load_usesPostMethod() throws Exception {
-        RequestFactory<Void> requestFactory = (method, target, payload) ->
+        RequestFactory<Void> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestHandler<Void, Credentials> requestHandler = request -> {
             assertEquals(Method.POST, request.method());
@@ -32,7 +32,7 @@ class AuthOutputPortTest {
     @Test
     void load_wrapsException() {
         IllegalStateException originalCause = new IllegalStateException("boom");
-        RequestFactory<Void> requestFactory = (_, _, _) -> null;
+        RequestFactory<Void> requestFactory = (_, _, _, _) -> null;
         RequestHandler<Void, Credentials> requestHandler = _ -> { throw originalCause; };
         AuthOutputPort port = new AuthOutputPort(requestFactory, requestHandler);
 
@@ -44,7 +44,7 @@ class AuthOutputPortTest {
     @Test
     void load_wrapsFactoryExceptionWithCause() {
         RuntimeException originalCause = new RuntimeException("factory-failure");
-        RequestFactory<Void> requestFactory = (_, _, _) -> {
+        RequestFactory<Void> requestFactory = (_, _, _, _) -> {
             throw originalCause;
         };
         RequestHandler<Void, Credentials> requestHandler = _ -> new Credentials("admin", "token");

@@ -17,7 +17,7 @@ class RuntimeDataInputPortTest {
     @Test
     void send_usesPutForFullPayload() throws Exception {
         AtomicReference<Request<?>> sent = new AtomicReference<>();
-        RequestFactory<RuntimeData> requestFactory = (method, target, payload) ->
+        RequestFactory<RuntimeData> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = sent::set;
         RuntimeDataInputPort port = new RuntimeDataInputPort(requestFactory, requestSender);

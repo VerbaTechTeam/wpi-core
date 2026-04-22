@@ -21,7 +21,7 @@ public class RuntimeDataOutputPort implements OutputPort<RuntimeData> {
     @Override
     public RuntimeData load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.DATA_READ, null));
+            return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.DATA_READ));
         } catch (Exception e) {
             throw new OutputPortException("Cannot load runtime data", e);
         }

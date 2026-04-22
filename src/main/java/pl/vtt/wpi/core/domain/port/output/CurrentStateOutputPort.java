@@ -21,7 +21,7 @@ public class CurrentStateOutputPort implements OutputPort<CurrentState> {
     @Override
     public CurrentState load() throws OutputPortException {
         try {
-            return requestHandler.handle(requestFactory.create(Method.GET, RequestTarget.CURRENT_STATE, null));
+            return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.CURRENT_STATE));
         } catch (Exception e) {
             throw new OutputPortException("Cannot load current state", e);
         }
