@@ -75,7 +75,9 @@ pl.vtt.wpi.core
 
 ### Authentication
 
-Login is handled by `LoginService`. On success, the resulting `Credentials` (username + token) are stored as a Basic Auth header in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
+Login is handled by `LoginService`. Internally, `LoginServiceImpl` delegates authorization to a dedicated port (`AuthOutputPort`), so request execution is decoupled from service orchestration.
+
+On success, the resulting `Credentials` (username + token) are stored as a Basic Auth header in `AuthorizationHolder` — a thread-local holder used to attach authorization to outgoing requests.
 
 ```java
 // Provided by a higher-level module
@@ -126,6 +128,15 @@ Credentials credentials = loginService.login("admin", "password");
 loginService.logout();
 ```
 
+### Domain Ports
+
+The package `pl.vtt.wpi.core.domain.port` contains concrete port implementations for domain operations:
+
+- **Output ports**: `AuthOutputPort`, `DeviceInfoOutputPort`, `RuntimeDataOutputPort`, `CurrentStateOutputPort`, `PixelProgramsOutputPort`, `UsersOutputPort`
+- **Input ports**: `RuntimeDataInputPort`, `WifiConfigInputPort`, `PixelProgramsInputPort`, `UserCreateInputPort`, `RestartInputPort`, `LogsDeleteInputPort`
+
+These ports encapsulate endpoint/method selection and exception mapping (`InputPortException` / `OutputPortException`), making application services thinner and easier to test.
+
 ## Building & Testing
 
 ```bash
@@ -136,7 +147,13 @@ mvn test
 mvn package
 ```
 
-Tests are written with JUnit Jupiter 5 and cover login success, invalid credentials, null/blank inputs, and logout behavior.
+Unit tests are written with JUnit Jupiter 5 and currently verify:
+
+- successful login flow (`Credentials` returned + Authorization header updated),
+- validation for null/blank username and password,
+- incorrect credentials / null auth response handling,
+- cleanup of `AuthorizationHolder` after failed login attempts (including runtime failures),
+- logout behavior.
 
 ## CI
 

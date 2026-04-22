@@ -24,6 +24,7 @@ public enum Resource {
     RESTART("/api/restart", Group.SYSTEM),
     WIFI_CONFIG("/api/wifi", Group.SYSTEM);
 
+    private static final String SUPPORTED_CONVERSIONS = "bhscdoxXfEeGgaAtT%";
     private final String path;
     private final Group group;
 
@@ -36,13 +37,49 @@ public enum Resource {
         return group;
     }
 
-    public String url(String baseUrl, Object... args) {
+    public int pathVariableCount() {
+        int count = 0;
+        for (int i = 0; i < path.length(); i++) {
+            if (path.charAt(i) != '%' || i + 1 >= path.length()) {
+                continue;
+            }
+            int j = i + 1;
+            // skip flags / width / precision / argument-index prefix
+            while (j < path.length() && isFormatModifier(path.charAt(j))) {
+                j++;
+            }
+            if (j >= path.length()) {
+                break;
+            }
+            char conv = path.charAt(j);
+            if (conv == '%' || conv == 'n') {
+                // literal % or newline — no argument consumed
+                i = j;
+            } else if (SUPPORTED_CONVERSIONS.indexOf(conv) >= 0) {
+                count++;
+                i = j;
+            }
+        }
+        return count;
+    }
+
+    private boolean isFormatModifier(char c) {
+        return c == '-' || c == '+' || c == '#' || c == '(' || c == ',' || c == '.' ||
+               (c >= '0' && c <= '9');
+    }
+
+    String url(String baseUrl, Object... args) {
+        int requiredArgs = pathVariableCount();
+        if (args.length != requiredArgs) {
+            throw new IllegalArgumentException("Expected " + requiredArgs
+                    + " arguments but got " + args.length);
+        }
         args = Arrays.stream(args)
                 .map(arg -> URLEncoder
                         .encode(String.valueOf(arg), StandardCharsets.UTF_8)
                         .replace("+", "%20"))
                 .toArray();
-        String formatted = path.formatted(args);
+        String formatted = requiredArgs == 0 ? path : path.formatted(args);
         return baseUrl == null ? formatted : baseUrl + formatted;
     }
 
