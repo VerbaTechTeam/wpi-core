@@ -17,7 +17,7 @@ class PixelProgramServiceImplTest {
         PixelProgramServiceImpl service = new PixelProgramServiceImpl(() -> List.of(), _ -> {});
 
         DataInconsistencyException exception = assertThrows(DataInconsistencyException.class,
-                () -> service.set(List.of((PixelProgram) null)));
+                () -> service.set(new java.util.ArrayList<>(java.util.Collections.singletonList(null))));
 
         assertEquals("Pixel programs cannot contain null elements", exception.getMessage());
     }
