@@ -22,6 +22,9 @@ public class AdminPasswordServiceImpl implements AdminPasswordService {
         if (passwordDto == null || passwordDto.password() == null || passwordDto.passwordConfirmation() == null) {
             throw new IllegalArgumentException("Password data cannot be null");
         }
+        if (passwordDto.password().isBlank() || passwordDto.passwordConfirmation().isBlank()) {
+            throw new IllegalArgumentException("Password and password confirmation cannot be blank");
+        }
         if (!passwordDto.password().equals(passwordDto.passwordConfirmation())) {
             throw new IllegalArgumentException("Password and password confirmation do not match");
         }

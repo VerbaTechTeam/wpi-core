@@ -7,6 +7,7 @@ import pl.vtt.wpi.core.application.exception.UserAlreadyExistsException;
 import pl.vtt.wpi.core.application.exception.UserNotExistsException;
 import pl.vtt.wpi.core.application.service.UserManagementService;
 import pl.vtt.wpi.core.domain.dto.PasswordDto;
+import pl.vtt.wpi.core.domain.dto.UserCreateRequest;
 import pl.vtt.wpi.core.domain.model.User;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.OutputPort;
@@ -15,17 +16,17 @@ import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 
 public class UserManagementServiceImpl implements UserManagementService {
     private final OutputPort<List<User>> usersOutputPort;
-    private final InputPort<User> userCreateInputPort;
+    private final InputPort<UserCreateRequest> userCreateRequestInputPort;
     private final InputPort<PasswordDto> changePasswordInputPort;
     private final InputPort<User> removeUserInputPort;
 
     public UserManagementServiceImpl(OutputPort<List<User>> usersOutputPort,
-                                     InputPort<User> userCreateInputPort,
+                                     InputPort<UserCreateRequest> userCreateRequestInputPort,
                                      InputPort<PasswordDto> changePasswordInputPort,
                                      InputPort<User> removeUserInputPort) {
         this.usersOutputPort = Objects.requireNonNull(usersOutputPort, "usersOutputPort cannot be null");
-        this.userCreateInputPort = Objects.requireNonNull(userCreateInputPort,
-                "userCreateInputPort cannot be null");
+        this.userCreateRequestInputPort = Objects.requireNonNull(userCreateRequestInputPort,
+                "userCreateRequestInputPort cannot be null");
         this.changePasswordInputPort = Objects.requireNonNull(changePasswordInputPort,
                 "changePasswordInputPort cannot be null");
         this.removeUserInputPort = Objects.requireNonNull(removeUserInputPort,
@@ -44,7 +45,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             throw new UserAlreadyExistsException();
         }
         try {
-            userCreateInputPort.send(user);
+            userCreateRequestInputPort.send(new UserCreateRequest(user, passwordDto));
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
             throw new RuntimeException("Cannot create user", cause);

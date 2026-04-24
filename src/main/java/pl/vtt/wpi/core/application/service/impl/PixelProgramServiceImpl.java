@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
 import pl.vtt.wpi.core.application.exception.PixelProgramNotFoundException;
 import pl.vtt.wpi.core.application.service.PixelProgramService;
@@ -14,9 +16,17 @@ import pl.vtt.wpi.core.domain.port.OutputPort;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 
+/**
+ * Default {@link PixelProgramService} implementation.
+ * <p>
+ * Mutating operations are synchronized per service instance with a lock to avoid
+ * read-modify-write races between {@code load()} and {@code send()} calls.
+ * </p>
+ */
 public class PixelProgramServiceImpl implements PixelProgramService {
     private final OutputPort<List<PixelProgram>> pixelProgramsOutputPort;
     private final InputPort<List<PixelProgram>> pixelProgramsInputPort;
+    private final Lock mutationLock = new ReentrantLock();
 
     public PixelProgramServiceImpl(OutputPort<List<PixelProgram>> pixelProgramsOutputPort,
                                    InputPort<List<PixelProgram>> pixelProgramsInputPort) {
@@ -33,37 +43,43 @@ public class PixelProgramServiceImpl implements PixelProgramService {
 
     @Override
     public void insert(List<PixelProgram> pixelPrograms) {
-        List<PixelProgram> current = getAll();
         if (pixelPrograms == null || pixelPrograms.isEmpty()) {
             return;
         }
-        current.addAll(pixelPrograms);
+        mutationLock.lock();
         try {
+            List<PixelProgram> current = getAll();
+            current.addAll(pixelPrograms);
             set(current);
         } catch (DataInconsistencyException e) {
-            throw new RuntimeException("Cannot insert pixel programs", e);
+            throw new IllegalStateException("Cannot insert pixel programs", e);
+        } finally {
+            mutationLock.unlock();
         }
     }
 
     @Override
     public void set(List<PixelProgram> pixelPrograms) throws DataInconsistencyException {
-        if (pixelPrograms == null) {
-            throw new DataInconsistencyException("Pixel programs cannot be null");
-        }
+        mutationLock.lock();
         try {
-            pixelProgramsInputPort.send(List.copyOf(pixelPrograms));
-        } catch (InputPortException e) {
-            Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new DataInconsistencyException("Cannot update pixel programs", cause);
+            if (pixelPrograms == null) {
+                throw new DataInconsistencyException("Pixel programs cannot be null");
+            }
+            try {
+                pixelProgramsInputPort.send(List.copyOf(pixelPrograms));
+            } catch (InputPortException e) {
+                Throwable cause = e.getCause() == null ? e : e.getCause();
+                throw new DataInconsistencyException("Cannot update pixel programs", cause);
+            }
+        } finally {
+            mutationLock.unlock();
         }
     }
 
     @Override
     public PixelProgram get(int index) throws PixelProgramNotFoundException {
-        return loadPrograms().stream()
-                .filter(pixelProgram -> pixelProgram.index() == index)
-                .findFirst()
-                .orElseThrow(() -> new PixelProgramNotFoundException("Pixel program %d not found".formatted(index)));
+        List<PixelProgram> programs = loadPrograms();
+        return programs.get(findListIndex(programs, index));
     }
 
     @Override
@@ -73,45 +89,56 @@ public class PixelProgramServiceImpl implements PixelProgramService {
 
     @Override
     public PixelProgram save(List<RgbColor> pixelProgram) {
-        List<PixelProgram> programs = getAll();
-        int nextIndex = programs.stream()
-                .map(PixelProgram::index)
-                .max(Comparator.naturalOrder())
-                .map(i -> i + 1)
-                .orElse(0);
-        PixelProgram saved = new PixelProgram(nextIndex,
-                pixelProgram == null ? List.of() : List.copyOf(pixelProgram));
-        programs.add(saved);
+        mutationLock.lock();
         try {
+            List<PixelProgram> programs = getAll();
+            int nextIndex = programs.stream()
+                    .map(PixelProgram::index)
+                    .max(Comparator.naturalOrder())
+                    .map(i -> i + 1)
+                    .orElse(0);
+            PixelProgram saved = new PixelProgram(nextIndex,
+                    pixelProgram == null ? List.of() : List.copyOf(pixelProgram));
+            programs.add(saved);
             set(programs);
+            return saved;
         } catch (DataInconsistencyException e) {
-            throw new RuntimeException("Cannot save pixel program", e);
+            throw new IllegalStateException("Cannot save pixel program", e);
+        } finally {
+            mutationLock.unlock();
         }
-        return saved;
     }
 
     @Override
     public PixelProgram update(int index, List<RgbColor> pixelProgram) throws PixelProgramNotFoundException {
-        List<PixelProgram> programs = getAll();
-        int replaceIndex = findListIndex(programs, index);
-        PixelProgram updated = new PixelProgram(index,
-                pixelProgram == null ? List.of() : List.copyOf(pixelProgram));
-        programs.set(replaceIndex, updated);
+        mutationLock.lock();
         try {
+            List<PixelProgram> programs = getAll();
+            int replaceIndex = findListIndex(programs, index);
+            PixelProgram updated = new PixelProgram(index,
+                    pixelProgram == null ? List.of() : List.copyOf(pixelProgram));
+            programs.set(replaceIndex, updated);
             set(programs);
+            return updated;
         } catch (DataInconsistencyException e) {
-            throw new RuntimeException("Cannot update pixel program", e);
+            throw new IllegalStateException("Cannot update pixel program", e);
+        } finally {
+            mutationLock.unlock();
         }
-        return updated;
     }
 
     @Override
     public PixelProgram remove(int index) throws PixelProgramNotFoundException, DataInconsistencyException {
-        List<PixelProgram> programs = getAll();
-        int removeIndex = findListIndex(programs, index);
-        PixelProgram removed = programs.remove(removeIndex);
-        set(programs);
-        return removed;
+        mutationLock.lock();
+        try {
+            List<PixelProgram> programs = getAll();
+            int removeIndex = findListIndex(programs, index);
+            PixelProgram removed = programs.remove(removeIndex);
+            set(programs);
+            return removed;
+        } finally {
+            mutationLock.unlock();
+        }
     }
 
     private List<PixelProgram> loadPrograms() {
@@ -120,7 +147,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             return pixelPrograms == null ? List.of() : pixelPrograms;
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot read pixel programs", cause);
+            throw new IllegalStateException("Cannot read pixel programs", cause);
         }
     }
 

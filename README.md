@@ -50,7 +50,7 @@ Then reference it in your project's `pom.xml`:
 
 The library follows a layered architecture:
 
-```
+```text
 pl.vtt.wpi.core
 ├── application
 │   ├── config       # AuthorizationHolder (thread-local auth state)
