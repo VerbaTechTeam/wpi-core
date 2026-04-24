@@ -151,7 +151,7 @@ mvn test
 mvn package
 ```
 
-Unit tests are written with JUnit Jupiter 5 and currently include coverage for core port behaviors and login service logic.
+Unit tests are written with JUnit Jupiter 5 and currently include coverage for port-level behavior and application-service logic (including `UserCreateInputPort` / `UserCreateRequest`, login flow, and related service orchestration paths).
 
 ## CI
 

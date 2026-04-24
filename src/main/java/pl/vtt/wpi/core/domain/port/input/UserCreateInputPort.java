@@ -28,6 +28,9 @@ public class UserCreateInputPort implements InputPort<UserCreateRequest> {
             Request<UserCreateRequest> request = requestFactory.create(obj, Method.POST, RequestTarget.USERS_CREATE);
             requestSender.send(request);
         } catch (Exception e) {
+            if (e instanceof InputPortException inputPortException) {
+                throw inputPortException;
+            }
             throw new InputPortException("Cannot create user", e);
         }
     }

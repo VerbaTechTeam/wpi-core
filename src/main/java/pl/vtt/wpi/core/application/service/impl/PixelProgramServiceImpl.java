@@ -65,6 +65,9 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             if (pixelPrograms == null) {
                 throw new DataInconsistencyException("Pixel programs cannot be null");
             }
+            if (pixelPrograms.stream().anyMatch(Objects::isNull)) {
+                throw new DataInconsistencyException("Pixel programs cannot contain null elements");
+            }
             try {
                 pixelProgramsInputPort.send(List.copyOf(pixelPrograms));
             } catch (InputPortException e) {
@@ -91,7 +94,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
     public PixelProgram save(List<RgbColor> pixelProgram) {
         mutationLock.lock();
         try {
-            List<PixelProgram> programs = getAll();
+            List<PixelProgram> programs = new ArrayList<>(getAll());
             int nextIndex = programs.stream()
                     .map(PixelProgram::index)
                     .max(Comparator.naturalOrder())

@@ -53,10 +53,30 @@ class UserCreateInputPortTest {
     }
 
     @Test
-    void send_nullUser_throwsInputPortException() {
+    void send_nullRequest_throwsInputPortException() {
         UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));
+
+        assertTrue(exception.getMessage().contains("User and password data cannot be null"));
+    }
+
+    @Test
+    void send_nullUserInRequest_throwsInputPortException() {
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
+
+        InputPortException exception = assertThrows(InputPortException.class, () ->
+                port.send(new UserCreateRequest(null, new PasswordDto("secret", "secret"))));
+
+        assertTrue(exception.getMessage().contains("User and password data cannot be null"));
+    }
+
+    @Test
+    void send_nullPasswordInRequest_throwsInputPortException() {
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
+
+        InputPortException exception = assertThrows(InputPortException.class, () ->
+                port.send(new UserCreateRequest(new User("admin", EnumSet.of(UserGroup.ADMIN)), null)));
 
         assertTrue(exception.getMessage().contains("User and password data cannot be null"));
     }
