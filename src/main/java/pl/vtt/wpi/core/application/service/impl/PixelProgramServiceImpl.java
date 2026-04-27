@@ -17,13 +17,6 @@ import pl.vtt.wpi.core.domain.port.OutputPort;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 
-/**
- * Default {@link PixelProgramService} implementation.
- * <p>
- * Mutating operations are synchronized per service instance with a lock to avoid
- * read-modify-write races between {@code load()} and {@code send()} calls.
- * </p>
- */
 public class PixelProgramServiceImpl implements PixelProgramService {
     private final OutputPort<List<PixelProgram>> pixelProgramsOutputPort;
     private final InputPort<List<PixelProgram>> pixelProgramsInputPort;

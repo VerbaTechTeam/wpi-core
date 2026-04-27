@@ -25,13 +25,6 @@ public class DebugServiceImpl implements DebugService {
                 "currentStateOutputPort cannot be null");
     }
 
-    /**
-     * Best-effort non-atomic read-and-clear operation.
-     * <p>
-     * This method performs {@link #peekLogs()} and then issues a separate delete call.
-     * Log entries appended between these calls may be deleted without appearing in the returned list.
-     * </p>
-     */
     @Override
     public List<String> pollLogs() throws DebugDataAccessException {
         List<String> logs = peekLogs();
