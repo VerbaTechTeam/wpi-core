@@ -2,6 +2,7 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.List;
 import java.util.Objects;
+import pl.vtt.wpi.core.application.exception.DebugServiceException;
 import pl.vtt.wpi.core.application.service.DebugService;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
 import pl.vtt.wpi.core.domain.port.InputPort;
@@ -32,34 +33,34 @@ public class DebugServiceImpl implements DebugService {
      * </p>
      */
     @Override
-    public List<String> pollLogs() {
+    public List<String> pollLogs() throws DebugServiceException {
         List<String> logs = peekLogs();
         try {
             logsDeleteInputPort.send(null);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot clear logs", cause);
+            throw new DebugServiceException("Cannot clear logs", cause);
         }
         return logs;
     }
 
     @Override
-    public List<String> peekLogs() {
+    public List<String> peekLogs() throws DebugServiceException {
         try {
             return logsOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot read logs", cause);
+            throw new DebugServiceException("Cannot read logs", cause);
         }
     }
 
     @Override
-    public CurrentState getCurrentState() {
+    public CurrentState getCurrentState() throws DebugServiceException {
         try {
             return currentStateOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot read current state", cause);
+            throw new DebugServiceException("Cannot read current state", cause);
         }
     }
 }

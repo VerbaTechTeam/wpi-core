@@ -2,6 +2,7 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
+import pl.vtt.wpi.core.application.exception.LoginServiceException;
 import pl.vtt.wpi.core.application.service.LoginService;
 import pl.vtt.wpi.core.domain.port.OutputPort;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
@@ -16,7 +17,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public Credentials login(String username, String password)
-            throws IncorrectUsernameOrPasswordException {
+            throws IncorrectUsernameOrPasswordException, LoginServiceException {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw new IncorrectUsernameOrPasswordException();
         }
@@ -25,14 +26,14 @@ public class LoginServiceImpl implements LoginService {
             Credentials credentials = getCredentials();
             AuthorizationHolder.authorize(credentials);
             return credentials;
-        } catch (IncorrectUsernameOrPasswordException | RuntimeException e) {
+        } catch (IncorrectUsernameOrPasswordException | LoginServiceException e) {
             AuthorizationHolder.clear();
             throw e;
         }
     }
 
     private Credentials getCredentials()
-            throws IncorrectUsernameOrPasswordException {
+            throws IncorrectUsernameOrPasswordException, LoginServiceException {
         final Credentials responseBody;
         try {
             responseBody = authPort.load();
@@ -41,7 +42,7 @@ public class LoginServiceImpl implements LoginService {
                 throw incorrect;
             }
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Login failed", cause);
+            throw new LoginServiceException("Login failed", cause);
         }
         if (responseBody == null) {
             throw new IncorrectUsernameOrPasswordException();

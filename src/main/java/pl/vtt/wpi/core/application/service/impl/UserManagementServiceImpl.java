@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import pl.vtt.wpi.core.application.exception.InvalidPasswordException;
 import pl.vtt.wpi.core.application.exception.UserAlreadyExistsException;
+import pl.vtt.wpi.core.application.exception.UserManagementServiceException;
 import pl.vtt.wpi.core.application.exception.UserNotExistsException;
 import pl.vtt.wpi.core.application.service.UserManagementService;
 import pl.vtt.wpi.core.domain.dto.PasswordDto;
@@ -35,10 +36,10 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     public void createUser(User user, PasswordDto passwordDto)
-            throws UserAlreadyExistsException, InvalidPasswordException {
+            throws UserAlreadyExistsException, InvalidPasswordException, UserManagementServiceException {
         validatePassword(passwordDto);
         if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
+            throw new UserManagementServiceException("User cannot be null");
         }
         boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
         if (exists) {
@@ -48,27 +49,27 @@ public class UserManagementServiceImpl implements UserManagementService {
             userCreateRequestInputPort.send(new UserCreateRequest(user, passwordDto));
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot create user", cause);
+            throw new UserManagementServiceException("Cannot create user", cause);
         }
     }
 
     @Override
     public void changePassword(PasswordDto passwordDto)
-            throws InvalidPasswordException {
+            throws InvalidPasswordException, UserManagementServiceException {
         validatePassword(passwordDto);
         try {
             changePasswordInputPort.send(passwordDto);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot change password", cause);
+            throw new UserManagementServiceException("Cannot change password", cause);
         }
     }
 
     @Override
     public void removeUser(User user)
-            throws UserNotExistsException {
+            throws UserNotExistsException, UserManagementServiceException {
         if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
+            throw new UserManagementServiceException("User cannot be null");
         }
         boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
         if (!exists) {
@@ -78,17 +79,17 @@ public class UserManagementServiceImpl implements UserManagementService {
             removeUserInputPort.send(user);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot remove user", cause);
+            throw new UserManagementServiceException("Cannot remove user", cause);
         }
     }
 
-    private List<User> loadUsers() {
+    private List<User> loadUsers() throws UserManagementServiceException {
         try {
             List<User> users = usersOutputPort.load();
             return users == null ? List.of() : users;
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot load users", cause);
+            throw new UserManagementServiceException("Cannot load users", cause);
         }
     }
 

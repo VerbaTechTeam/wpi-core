@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
+import pl.vtt.wpi.core.application.exception.RuntimeDataServiceException;
 import pl.vtt.wpi.core.application.service.RuntimeDataService;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
@@ -29,30 +30,30 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     }
 
     @Override
-    public RuntimeData read() {
+    public RuntimeData read() throws RuntimeDataServiceException {
         try {
             return runtimeDataOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot read runtime data", cause);
+            throw new RuntimeDataServiceException("Cannot read runtime data", cause);
         }
     }
 
     @Override
-    public void set(RuntimeData runtimeData) throws DataInconsistencyException {
+    public void set(RuntimeData runtimeData) throws DataInconsistencyException, RuntimeDataServiceException {
         if (runtimeData == null) {
-            throw new NullPointerException("Runtime data cannot be null");
+            throw new RuntimeDataServiceException("Runtime data cannot be null");
         }
         validatePixelProgramExists(runtimeData);
-        send(runtimeData, "Cannot set runtime data");
+        send(runtimeData);
     }
 
-    private void send(RuntimeData runtimeData, String message) throws DataInconsistencyException {
+    private void send(RuntimeData runtimeData) throws RuntimeDataServiceException {
         try {
             runtimeDataInputPort.send(runtimeData);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new DataInconsistencyException(message, cause);
+            throw new RuntimeDataServiceException("Cannot set runtime data", cause);
         }
     }
 

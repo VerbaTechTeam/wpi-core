@@ -3,6 +3,7 @@ package pl.vtt.wpi.core.application.service.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
+import pl.vtt.wpi.core.application.exception.DebugServiceException;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.OutputPort;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DebugServiceImplTest {
 
     @Test
-    void pollLogs_readsAndClearsLogs() {
+    void pollLogs_readsAndClearsLogs() throws Exception {
         OutputPort<List<String>> logsOutputPort = () -> List.of("a", "b");
         AtomicBoolean cleared = new AtomicBoolean(false);
         InputPort<Void> deleteInputPort = _ -> cleared.set(true);
@@ -37,7 +38,7 @@ class DebugServiceImplTest {
                 () -> new CurrentState.Builder().build()
         );
 
-        RuntimeException exception = assertThrows(RuntimeException.class, service::peekLogs);
+        DebugServiceException exception = assertThrows(DebugServiceException.class, service::peekLogs);
         assertEquals("Cannot read logs", exception.getMessage());
     }
 }

@@ -23,7 +23,7 @@ class PixelProgramServiceImplTest {
     }
 
     @Test
-    void save_addsProgramWithNextIndexAndSendsAll() {
+    void save_addsProgramWithNextIndexAndSendsAll() throws Exception {
         AtomicReference<List<PixelProgram>> sent = new AtomicReference<>();
         PixelProgramServiceImpl service = new PixelProgramServiceImpl(
                 () -> List.of(new PixelProgram(0, List.of())),

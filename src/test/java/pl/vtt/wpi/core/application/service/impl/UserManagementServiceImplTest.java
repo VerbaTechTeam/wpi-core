@@ -35,7 +35,7 @@ class UserManagementServiceImplTest {
     }
 
     @Test
-    void createUser_existingUser_throwsUserAlreadyExistsException() {
+    void createUser_existingUser_throwsUserAlreadyExistsException() throws Exception {
         User user = new User("john", EnumSet.of(UserGroup.ADMIN));
         PasswordDto passwordDto = new PasswordDto("secret", "secret");
 

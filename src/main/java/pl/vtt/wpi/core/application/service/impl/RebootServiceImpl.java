@@ -1,6 +1,7 @@
 package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.Objects;
+import pl.vtt.wpi.core.application.exception.RebootServiceException;
 import pl.vtt.wpi.core.application.service.RebootService;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
@@ -14,12 +15,12 @@ public class RebootServiceImpl implements RebootService {
     }
 
     @Override
-    public void reboot() {
+    public void reboot() throws RebootServiceException {
         try {
             rebootInputPort.send(null);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeException("Cannot reboot device", cause);
+            throw new RebootServiceException("Cannot reboot device", cause);
         }
     }
 }

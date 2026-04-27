@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NetworkConfigurationServiceImplTest {
 
     @Test
-    void config_accessPointConfig_isMappedToWifiConfig() {
+    void config_accessPointConfig_isMappedToWifiConfig() throws Exception {
         AtomicReference<WifiConfig> sent = new AtomicReference<>();
         NetworkConfigurationServiceImpl service = new NetworkConfigurationServiceImpl(sent::set);
 
