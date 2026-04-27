@@ -57,7 +57,8 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
         }
     }
 
-    private void validatePixelProgramExists(RuntimeData runtimeData) throws DataInconsistencyException {
+    private void validatePixelProgramExists(RuntimeData runtimeData)
+            throws DataInconsistencyException, RuntimeDataOperationException {
         if (runtimeData.pixelProgram() == null) {
             return;
         }
@@ -66,12 +67,12 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
             pixelPrograms = pixelProgramsOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new DataInconsistencyException("Cannot validate runtime data", cause);
+            throw new RuntimeDataOperationException("Cannot validate runtime data", cause);
         }
 
         boolean exists = pixelPrograms != null
                 && pixelPrograms.stream().anyMatch(program ->
-                program != null && program.index() == runtimeData.pixelProgram());
+                program != null && Objects.equals(program.index(), runtimeData.pixelProgram()));
 
         if (!exists) {
             String message = "Pixel program %d does not exist".formatted(runtimeData.pixelProgram());

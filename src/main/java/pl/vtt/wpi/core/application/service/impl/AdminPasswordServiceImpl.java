@@ -3,6 +3,7 @@ package pl.vtt.wpi.core.application.service.impl;
 import java.util.Objects;
 import pl.vtt.wpi.core.application.exception.AdminPasswordResetException;
 import pl.vtt.wpi.core.application.service.AdminPasswordService;
+import pl.vtt.wpi.core.domain.dto.AdminPasswordResetRequest;
 import pl.vtt.wpi.core.domain.dto.PasswordDto;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
@@ -35,8 +36,5 @@ public class AdminPasswordServiceImpl implements AdminPasswordService {
             Throwable cause = e.getCause() == null ? e : e.getCause();
             throw new AdminPasswordResetException("Cannot reset admin password", cause);
         }
-    }
-
-    public record AdminPasswordResetRequest(String secureKey, PasswordDto passwordDto) {
     }
 }

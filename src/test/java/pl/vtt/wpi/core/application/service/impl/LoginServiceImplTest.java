@@ -57,8 +57,8 @@ class LoginServiceImplTest {
     }
 
     @Test
-    @DisplayName("Tests cleanup when auth port throws runtime exception")
-    void runtime_exception_clears_authorization() {
+    @DisplayName("Tests cleanup when OutputPortException causes AuthenticationServiceUnavailableException")
+    void output_port_exception_clears_authorization() {
         String username = "test";
         String password = "test123";
         OutputPort<Credentials> port = () -> {

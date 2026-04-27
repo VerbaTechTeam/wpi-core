@@ -8,12 +8,36 @@ import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
 import pl.vtt.wpi.core.application.exception.RuntimeDataOperationException;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
+import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RuntimeDataServiceImplTest {
+
+    @Test
+    void read_success_returnsRuntimeData() throws Exception {
+        RuntimeData runtimeData = new RuntimeData.Builder().build();
+        RuntimeDataServiceImpl service = new RuntimeDataServiceImpl(() -> runtimeData, () -> List.of(), _ -> {});
+
+        RuntimeData result = service.read();
+
+        assertEquals(runtimeData, result);
+    }
+
+    @Test
+    void read_outputPortFailure_throwsRuntimeDataOperationException() {
+        RuntimeDataServiceImpl service = new RuntimeDataServiceImpl(
+                () -> { throw new OutputPortException("read failed"); },
+                () -> List.of(),
+                _ -> {}
+        );
+
+        RuntimeDataOperationException exception = assertThrows(RuntimeDataOperationException.class, service::read);
+
+        assertInstanceOf(OutputPortException.class, exception.getCause());
+    }
 
     @Test
     void set_nullRuntimeData_throwsRuntimeDataOperationException() {

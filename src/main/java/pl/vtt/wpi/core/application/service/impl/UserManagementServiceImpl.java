@@ -2,6 +2,8 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import pl.vtt.wpi.core.application.exception.InvalidPasswordException;
 import pl.vtt.wpi.core.application.exception.UserAlreadyExistsException;
 import pl.vtt.wpi.core.application.exception.UserManagementOperationException;
@@ -20,6 +22,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final InputPort<UserCreateRequest> userCreateRequestInputPort;
     private final InputPort<PasswordDto> changePasswordInputPort;
     private final InputPort<User> removeUserInputPort;
+    private final Lock userLock = new ReentrantLock();
 
     public UserManagementServiceImpl(OutputPort<List<User>> usersOutputPort,
                                      InputPort<UserCreateRequest> userCreateRequestInputPort,
@@ -37,19 +40,22 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public void createUser(User user, PasswordDto passwordDto)
             throws UserAlreadyExistsException, InvalidPasswordException, UserManagementOperationException {
-        validatePassword(passwordDto);
         if (user == null) {
             throw new UserManagementOperationException("User cannot be null");
         }
-        boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
-        if (exists) {
-            throw new UserAlreadyExistsException();
-        }
+        validatePassword(passwordDto);
+        userLock.lock();
         try {
+            boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
+            if (exists) {
+                throw new UserAlreadyExistsException();
+            }
             userCreateRequestInputPort.send(new UserCreateRequest(user, passwordDto));
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
             throw new UserManagementOperationException("Cannot create user", cause);
+        } finally {
+            userLock.unlock();
         }
     }
 
@@ -71,15 +77,18 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (user == null) {
             throw new UserManagementOperationException("User cannot be null");
         }
-        boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
-        if (!exists) {
-            throw new UserNotExistsException();
-        }
+        userLock.lock();
         try {
+            boolean exists = loadUsers().stream().anyMatch(existingUser -> existingUser.username().equals(user.username()));
+            if (!exists) {
+                throw new UserNotExistsException();
+            }
             removeUserInputPort.send(user);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
             throw new UserManagementOperationException("Cannot remove user", cause);
+        } finally {
+            userLock.unlock();
         }
     }
 

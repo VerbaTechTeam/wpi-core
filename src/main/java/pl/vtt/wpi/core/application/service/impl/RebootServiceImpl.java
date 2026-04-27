@@ -19,8 +19,7 @@ public class RebootServiceImpl implements RebootService {
         try {
             rebootInputPort.send(null);
         } catch (InputPortException e) {
-            Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new DeviceRebootException("Cannot reboot device", cause);
+            throw new DeviceRebootException("Cannot reboot device", e);
         }
     }
 }

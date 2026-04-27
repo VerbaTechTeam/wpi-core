@@ -26,7 +26,9 @@ public class LoginServiceImpl implements LoginService {
             Credentials credentials = getCredentials();
             AuthorizationHolder.authorize(credentials);
             return credentials;
-        } catch (IncorrectUsernameOrPasswordException | AuthenticationServiceUnavailableException e) {
+        } catch (IncorrectUsernameOrPasswordException
+                 | AuthenticationServiceUnavailableException
+                 | RuntimeException e) {
             AuthorizationHolder.clear();
             throw e;
         }
