@@ -3,7 +3,7 @@ package pl.vtt.wpi.core.application.service.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.exception.DebugServiceException;
+import pl.vtt.wpi.core.application.exception.DebugDataAccessException;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.OutputPort;
@@ -38,7 +38,7 @@ class DebugServiceImplTest {
                 () -> new CurrentState.Builder().build()
         );
 
-        DebugServiceException exception = assertThrows(DebugServiceException.class, service::peekLogs);
+        DebugDataAccessException exception = assertThrows(DebugDataAccessException.class, service::peekLogs);
         assertEquals("Cannot read logs", exception.getMessage());
     }
 }

@@ -1,7 +1,7 @@
 package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.Objects;
-import pl.vtt.wpi.core.application.exception.DeviceInfoServiceException;
+import pl.vtt.wpi.core.application.exception.DeviceInfoReadException;
 import pl.vtt.wpi.core.application.service.DeviceInfoService;
 import pl.vtt.wpi.core.domain.model.device.DeviceInfo;
 import pl.vtt.wpi.core.domain.port.OutputPort;
@@ -16,12 +16,12 @@ public class DeviceInfoServiceImpl implements DeviceInfoService {
     }
 
     @Override
-    public DeviceInfo read() throws DeviceInfoServiceException {
+    public DeviceInfo read() throws DeviceInfoReadException {
         try {
             return deviceInfoOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new DeviceInfoServiceException("Cannot read device info", cause);
+            throw new DeviceInfoReadException("Cannot read device info", cause);
         }
     }
 }

@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
-import pl.vtt.wpi.core.application.exception.RuntimeDataServiceException;
+import pl.vtt.wpi.core.application.exception.RuntimeDataOperationException;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
 
@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class RuntimeDataServiceImplTest {
 
     @Test
-    void set_nullRuntimeData_throwsRuntimeDataServiceException() {
+    void set_nullRuntimeData_throwsRuntimeDataOperationException() {
         RuntimeDataServiceImpl service = new RuntimeDataServiceImpl(() -> null, () -> List.of(), _ -> {});
 
-        RuntimeDataServiceException exception = assertThrows(RuntimeDataServiceException.class,
+        RuntimeDataOperationException exception = assertThrows(RuntimeDataOperationException.class,
                 () -> service.set(null));
 
         assertEquals("Runtime data cannot be null", exception.getMessage());

@@ -2,7 +2,7 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.exception.AdminPasswordServiceException;
+import pl.vtt.wpi.core.application.exception.AdminPasswordResetException;
 import pl.vtt.wpi.core.domain.dto.PasswordDto;
 import pl.vtt.wpi.core.domain.port.InputPort;
 
@@ -25,10 +25,10 @@ class AdminPasswordServiceImplTest {
     }
 
     @Test
-    void resetPassword_blankPassword_throwsAdminPasswordServiceException() {
+    void resetPassword_blankPassword_throwsAdminPasswordResetException() {
         AdminPasswordServiceImpl service = new AdminPasswordServiceImpl(_ -> {});
 
-        assertThrows(AdminPasswordServiceException.class,
+        assertThrows(AdminPasswordResetException.class,
                 () -> service.resetPassword("secure-key", new PasswordDto(" ", " ")));
     }
 }

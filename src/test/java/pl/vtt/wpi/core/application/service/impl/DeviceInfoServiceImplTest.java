@@ -2,7 +2,7 @@ package pl.vtt.wpi.core.application.service.impl;
 
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import pl.vtt.wpi.core.application.exception.DeviceInfoServiceException;
+import pl.vtt.wpi.core.application.exception.DeviceInfoReadException;
 import pl.vtt.wpi.core.domain.model.device.DeviceInfo;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 
@@ -25,7 +25,7 @@ class DeviceInfoServiceImplTest {
                 () -> { throw new OutputPortException("x", new IllegalArgumentException("boom")); }
         );
 
-        DeviceInfoServiceException exception = assertThrows(DeviceInfoServiceException.class, service::read);
+        DeviceInfoReadException exception = assertThrows(DeviceInfoReadException.class, service::read);
         assertEquals("Cannot read device info", exception.getMessage());
     }
 }

@@ -8,7 +8,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
 import pl.vtt.wpi.core.application.exception.PixelProgramNotFoundException;
-import pl.vtt.wpi.core.application.exception.PixelProgramServiceException;
+import pl.vtt.wpi.core.application.exception.PixelProgramOperationException;
 import pl.vtt.wpi.core.application.service.PixelProgramService;
 import pl.vtt.wpi.core.domain.model.color.RgbColor;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
@@ -38,12 +38,12 @@ public class PixelProgramServiceImpl implements PixelProgramService {
     }
 
     @Override
-    public List<PixelProgram> getAll() throws PixelProgramServiceException {
+    public List<PixelProgram> getAll() throws PixelProgramOperationException {
         return new ArrayList<>(loadPrograms());
     }
 
     @Override
-    public void insert(List<PixelProgram> pixelPrograms) throws PixelProgramServiceException {
+    public void insert(List<PixelProgram> pixelPrograms) throws PixelProgramOperationException {
         if (pixelPrograms == null || pixelPrograms.isEmpty()) {
             return;
         }
@@ -53,7 +53,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             current.addAll(pixelPrograms);
             set(current);
         } catch (DataInconsistencyException e) {
-            throw new PixelProgramServiceException("Cannot insert pixel programs", e);
+            throw new PixelProgramOperationException("Cannot insert pixel programs", e);
         } finally {
             mutationLock.unlock();
         }
@@ -81,7 +81,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
     }
 
     @Override
-    public PixelProgram get(int index) throws PixelProgramNotFoundException, PixelProgramServiceException {
+    public PixelProgram get(int index) throws PixelProgramNotFoundException, PixelProgramOperationException {
         List<PixelProgram> programs = loadPrograms();
         return programs.get(findListIndex(programs, index));
     }
@@ -92,7 +92,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
     }
 
     @Override
-    public PixelProgram save(List<RgbColor> pixelProgram) throws PixelProgramServiceException {
+    public PixelProgram save(List<RgbColor> pixelProgram) throws PixelProgramOperationException {
         mutationLock.lock();
         try {
             List<PixelProgram> programs = new ArrayList<>(getAll());
@@ -107,7 +107,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             set(programs);
             return saved;
         } catch (DataInconsistencyException e) {
-            throw new PixelProgramServiceException("Cannot save pixel program", e);
+            throw new PixelProgramOperationException("Cannot save pixel program", e);
         } finally {
             mutationLock.unlock();
         }
@@ -115,7 +115,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
 
     @Override
     public PixelProgram update(int index, List<RgbColor> pixelProgram)
-            throws PixelProgramNotFoundException, PixelProgramServiceException {
+            throws PixelProgramNotFoundException, PixelProgramOperationException {
         mutationLock.lock();
         try {
             List<PixelProgram> programs = getAll();
@@ -126,7 +126,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             set(programs);
             return updated;
         } catch (DataInconsistencyException e) {
-            throw new PixelProgramServiceException("Cannot update pixel program", e);
+            throw new PixelProgramOperationException("Cannot update pixel program", e);
         } finally {
             mutationLock.unlock();
         }
@@ -134,7 +134,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
 
     @Override
     public PixelProgram remove(int index)
-            throws PixelProgramNotFoundException, DataInconsistencyException, PixelProgramServiceException {
+            throws PixelProgramNotFoundException, DataInconsistencyException, PixelProgramOperationException {
         mutationLock.lock();
         try {
             List<PixelProgram> programs = getAll();
@@ -142,20 +142,20 @@ public class PixelProgramServiceImpl implements PixelProgramService {
             PixelProgram removed = programs.remove(removeIndex);
             set(programs);
             return removed;
-        } catch (PixelProgramServiceException e) {
+        } catch (PixelProgramOperationException e) {
             throw e;
         } finally {
             mutationLock.unlock();
         }
     }
 
-    private List<PixelProgram> loadPrograms() throws PixelProgramServiceException {
+    private List<PixelProgram> loadPrograms() throws PixelProgramOperationException {
         try {
             List<PixelProgram> pixelPrograms = pixelProgramsOutputPort.load();
             return pixelPrograms == null ? List.of() : pixelPrograms;
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new PixelProgramServiceException("Cannot read pixel programs", cause);
+            throw new PixelProgramOperationException("Cannot read pixel programs", cause);
         }
     }
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.config.AuthorizationHolder;
 import pl.vtt.wpi.core.application.exception.IncorrectUsernameOrPasswordException;
-import pl.vtt.wpi.core.application.exception.LoginServiceException;
+import pl.vtt.wpi.core.application.exception.AuthenticationServiceUnavailableException;
 import pl.vtt.wpi.core.domain.port.OutputPort;
 import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.Credentials;
@@ -38,7 +38,7 @@ class LoginServiceImplTest {
                     .encodeToString((username + ":" + token).getBytes(StandardCharsets.UTF_8));
             assertEquals(expectedType, AuthorizationHolder.get().type());
             assertEquals(expectedCredentials, AuthorizationHolder.get().credentials());
-        } catch (IncorrectUsernameOrPasswordException | LoginServiceException e) {
+        } catch (IncorrectUsernameOrPasswordException | AuthenticationServiceUnavailableException e) {
             fail(e);
         }
     }
@@ -66,7 +66,7 @@ class LoginServiceImplTest {
         };
         LoginServiceImpl instance = new LoginServiceImpl(port);
 
-        LoginServiceException exception = assertThrows(LoginServiceException.class,
+        AuthenticationServiceUnavailableException exception = assertThrows(AuthenticationServiceUnavailableException.class,
                 () -> instance.login(username, password));
         assertEquals("Login failed", exception.getMessage());
         assertNotNull(exception.getCause());

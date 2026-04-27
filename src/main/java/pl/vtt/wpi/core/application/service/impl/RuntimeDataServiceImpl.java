@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import pl.vtt.wpi.core.application.exception.DataInconsistencyException;
-import pl.vtt.wpi.core.application.exception.RuntimeDataServiceException;
+import pl.vtt.wpi.core.application.exception.RuntimeDataOperationException;
 import pl.vtt.wpi.core.application.service.RuntimeDataService;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
@@ -30,30 +30,30 @@ public class RuntimeDataServiceImpl implements RuntimeDataService {
     }
 
     @Override
-    public RuntimeData read() throws RuntimeDataServiceException {
+    public RuntimeData read() throws RuntimeDataOperationException {
         try {
             return runtimeDataOutputPort.load();
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeDataServiceException("Cannot read runtime data", cause);
+            throw new RuntimeDataOperationException("Cannot read runtime data", cause);
         }
     }
 
     @Override
-    public void set(RuntimeData runtimeData) throws DataInconsistencyException, RuntimeDataServiceException {
+    public void set(RuntimeData runtimeData) throws DataInconsistencyException, RuntimeDataOperationException {
         if (runtimeData == null) {
-            throw new RuntimeDataServiceException("Runtime data cannot be null");
+            throw new RuntimeDataOperationException("Runtime data cannot be null");
         }
         validatePixelProgramExists(runtimeData);
         send(runtimeData);
     }
 
-    private void send(RuntimeData runtimeData) throws RuntimeDataServiceException {
+    private void send(RuntimeData runtimeData) throws RuntimeDataOperationException {
         try {
             runtimeDataInputPort.send(runtimeData);
         } catch (InputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
-            throw new RuntimeDataServiceException("Cannot set runtime data", cause);
+            throw new RuntimeDataOperationException("Cannot set runtime data", cause);
         }
     }
 
