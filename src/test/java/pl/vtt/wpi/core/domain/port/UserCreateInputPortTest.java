@@ -3,6 +3,8 @@ package pl.vtt.wpi.core.domain.port;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import pl.vtt.wpi.core.domain.dto.PasswordDto;
+import pl.vtt.wpi.core.domain.dto.UserCreateRequest;
 import pl.vtt.wpi.core.infrastructure.RequestFactory;
 import pl.vtt.wpi.core.infrastructure.RequestSender;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
@@ -23,14 +25,16 @@ class UserCreateInputPortTest {
     @Test
     void send_success_invokesFactoryAndSender() throws Exception {
         User user = new User("admin", EnumSet.of(UserGroup.ADMIN));
+        PasswordDto passwordDto = new PasswordDto("secret", "secret");
+        UserCreateRequest userCreateRequest = new UserCreateRequest(user, passwordDto);
         AtomicReference<Method> usedMethod = new AtomicReference<>();
         AtomicReference<RequestTarget> usedTarget = new AtomicReference<>();
-        AtomicReference<User> usedPayload = new AtomicReference<>();
+        AtomicReference<UserCreateRequest> usedPayload = new AtomicReference<>();
         AtomicReference<Request<?>> sentRequest = new AtomicReference<>();
 
-        Request<User> request = new Request<>(null, Method.POST,
-                RequestTarget.USERS_CREATE.url("http://localhost"), null, user);
-        RequestFactory<User> requestFactory = (payload, method, target, _) -> {
+        Request<UserCreateRequest> request = new Request<>(null, Method.POST,
+                RequestTarget.USERS_CREATE.url("http://localhost"), null, userCreateRequest);
+        RequestFactory<UserCreateRequest> requestFactory = (payload, method, target, _) -> {
             usedMethod.set(method);
             usedTarget.set(target);
             usedPayload.set(payload);
@@ -40,27 +44,47 @@ class UserCreateInputPortTest {
 
         UserCreateInputPort port = new UserCreateInputPort(requestFactory, requestSender);
 
-        port.send(user);
+        port.send(userCreateRequest);
 
         assertEquals(Method.POST, usedMethod.get());
         assertEquals(RequestTarget.USERS_CREATE, usedTarget.get());
-        assertSame(user, usedPayload.get());
+        assertSame(userCreateRequest, usedPayload.get());
         assertSame(request, sentRequest.get());
     }
 
     @Test
-    void send_nullUser_throwsInputPortException() {
+    void send_nullRequest_throwsInputPortException() {
         UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
 
         InputPortException exception = assertThrows(InputPortException.class, () -> port.send(null));
 
-        assertTrue(exception.getMessage().contains("User cannot be null"));
+        assertTrue(exception.getMessage().contains("User and password data cannot be null"));
+    }
+
+    @Test
+    void send_nullUserInRequest_throwsInputPortException() {
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
+
+        InputPortException exception = assertThrows(InputPortException.class, () ->
+                port.send(new UserCreateRequest(null, new PasswordDto("secret", "secret"))));
+
+        assertTrue(exception.getMessage().contains("User and password data cannot be null"));
+    }
+
+    @Test
+    void send_nullPasswordInRequest_throwsInputPortException() {
+        UserCreateInputPort port = new UserCreateInputPort((_, _, _, _) -> null, _ -> {});
+
+        InputPortException exception = assertThrows(InputPortException.class, () ->
+                port.send(new UserCreateRequest(new User("admin", EnumSet.of(UserGroup.ADMIN)), null)));
+
+        assertTrue(exception.getMessage().contains("User and password data cannot be null"));
     }
 
     @Test
     void send_factoryException_wrapsWithCause() {
         RuntimeException originalCause = new RuntimeException("factory failure");
-        RequestFactory<User> requestFactory = (_, _, _, _) -> {
+        RequestFactory<UserCreateRequest> requestFactory = (_, _, _, _) -> {
             throw originalCause;
         };
         RequestSender requestSender = _ -> {};
@@ -68,7 +92,10 @@ class UserCreateInputPortTest {
         UserCreateInputPort port = new UserCreateInputPort(requestFactory, requestSender);
 
         InputPortException exception = assertThrows(InputPortException.class,
-                () -> port.send(new User("admin", EnumSet.of(UserGroup.ADMIN))));
+                () -> port.send(new UserCreateRequest(
+                        new User("admin", EnumSet.of(UserGroup.ADMIN)),
+                        new PasswordDto("secret", "secret")
+                )));
 
         assertTrue(exception.getMessage().contains("Cannot create user"));
         assertSame(originalCause, exception.getCause());
@@ -77,9 +104,11 @@ class UserCreateInputPortTest {
     @Test
     void send_senderException_wrapsWithCause() {
         User user = new User("admin", EnumSet.of(UserGroup.ADMIN));
+        PasswordDto passwordDto = new PasswordDto("secret", "secret");
+        UserCreateRequest userCreateRequest = new UserCreateRequest(user, passwordDto);
         RuntimeException originalCause = new RuntimeException("send failure");
 
-        RequestFactory<User> requestFactory = (payload, method, target, _) ->
+        RequestFactory<UserCreateRequest> requestFactory = (payload, method, target, _) ->
                 new Request<>(null, method, target.url("http://localhost"), null, payload);
         RequestSender requestSender = _ -> {
             throw originalCause;
@@ -87,7 +116,7 @@ class UserCreateInputPortTest {
 
         UserCreateInputPort port = new UserCreateInputPort(requestFactory, requestSender);
 
-        InputPortException exception = assertThrows(InputPortException.class, () -> port.send(user));
+        InputPortException exception = assertThrows(InputPortException.class, () -> port.send(userCreateRequest));
 
         assertTrue(exception.getMessage().contains("Cannot create user"));
         assertSame(originalCause, exception.getCause());
