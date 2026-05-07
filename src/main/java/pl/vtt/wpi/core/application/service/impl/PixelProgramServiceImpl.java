@@ -90,6 +90,7 @@ public class PixelProgramServiceImpl implements PixelProgramService {
         try {
             List<PixelProgram> programs = new ArrayList<>(getAll());
             int nextIndex = programs.stream()
+                    .filter(Objects::nonNull)
                     .map(PixelProgram::index)
                     .max(Comparator.naturalOrder())
                     .map(i -> i + 1)

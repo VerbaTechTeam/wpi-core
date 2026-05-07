@@ -95,7 +95,13 @@ public class UserManagementServiceImpl implements UserManagementService {
     private List<User> loadUsers() throws UserManagementOperationException {
         try {
             List<User> users = usersOutputPort.load();
-            return users == null ? List.of() : users;
+            if (users == null) {
+                return List.of();
+            }
+            if (users.stream().anyMatch(Objects::isNull)) {
+                throw new UserManagementOperationException("Users cannot contain null elements");
+            }
+            return users;
         } catch (OutputPortException e) {
             Throwable cause = e.getCause() == null ? e : e.getCause();
             throw new UserManagementOperationException("Cannot load users", cause);
