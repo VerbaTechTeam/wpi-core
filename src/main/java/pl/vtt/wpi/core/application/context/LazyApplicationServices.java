@@ -21,9 +21,9 @@ import pl.vtt.wpi.core.application.service.impl.PixelProgramServiceImpl;
 import pl.vtt.wpi.core.application.service.impl.RebootServiceImpl;
 import pl.vtt.wpi.core.application.service.impl.RuntimeDataServiceImpl;
 import pl.vtt.wpi.core.application.service.impl.UserManagementServiceImpl;
-import pl.vtt.wpi.core.domain.dto.AdminPasswordResetRequest;
-import pl.vtt.wpi.core.domain.dto.PasswordDto;
-import pl.vtt.wpi.core.domain.dto.UserCreateRequest;
+import pl.vtt.wpi.core.infrastructure.dto.AdminPasswordResetRequest;
+import pl.vtt.wpi.core.infrastructure.dto.PasswordDto;
+import pl.vtt.wpi.core.infrastructure.dto.UserCreateRequest;
 import pl.vtt.wpi.core.domain.model.Credentials;
 import pl.vtt.wpi.core.domain.model.User;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
@@ -34,12 +34,6 @@ import pl.vtt.wpi.core.domain.model.device.WifiConfig;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.OutputPort;
 
-/**
- * Lazy composition root for the default application services.
- *
- * <p>Dependencies are registered as suppliers, resolved once on first use, and
- * then passed to service implementations through their constructors.</p>
- */
 public final class LazyApplicationServices implements ApplicationServices {
     private final Lazy<OutputPort<Credentials>> authOutputPort;
     private final Lazy<InputPort<AdminPasswordResetRequest>> adminPasswordResetInputPort;

@@ -8,7 +8,7 @@ import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.DeviceInfo;
 import pl.vtt.wpi.core.domain.model.endpoint.RequestTarget;
-import pl.vtt.wpi.core.domain.port.output.DeviceInfoOutputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.DeviceInfoOutputPort;
 
 import static org.junit.jupiter.api.Assertions.*;
 

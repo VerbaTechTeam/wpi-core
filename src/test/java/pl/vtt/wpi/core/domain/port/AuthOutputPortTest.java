@@ -7,7 +7,7 @@ import pl.vtt.wpi.core.domain.port.exception.OutputPortException;
 import pl.vtt.wpi.core.domain.model.Credentials;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.port.output.AuthOutputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.AuthOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;

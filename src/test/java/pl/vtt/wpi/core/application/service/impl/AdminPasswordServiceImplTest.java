@@ -3,8 +3,8 @@ package pl.vtt.wpi.core.application.service.impl;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.exception.AdminPasswordResetException;
-import pl.vtt.wpi.core.domain.dto.AdminPasswordResetRequest;
-import pl.vtt.wpi.core.domain.dto.PasswordDto;
+import pl.vtt.wpi.core.infrastructure.dto.AdminPasswordResetRequest;
+import pl.vtt.wpi.core.infrastructure.dto.PasswordDto;
 import pl.vtt.wpi.core.domain.port.InputPort;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 

@@ -8,7 +8,7 @@ import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.WifiConfig;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.port.input.WifiConfigInputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.WifiConfigInputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

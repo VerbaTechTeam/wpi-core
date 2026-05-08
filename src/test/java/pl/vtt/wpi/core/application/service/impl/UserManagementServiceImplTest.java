@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import pl.vtt.wpi.core.application.exception.InvalidPasswordException;
 import pl.vtt.wpi.core.application.exception.UserAlreadyExistsException;
 import pl.vtt.wpi.core.application.exception.UserManagementOperationException;
-import pl.vtt.wpi.core.domain.dto.PasswordDto;
-import pl.vtt.wpi.core.domain.dto.UserCreateRequest;
+import pl.vtt.wpi.core.infrastructure.dto.PasswordDto;
+import pl.vtt.wpi.core.infrastructure.dto.UserCreateRequest;
 import pl.vtt.wpi.core.domain.model.User;
 import pl.vtt.wpi.core.domain.model.endpoint.UserGroup;
 

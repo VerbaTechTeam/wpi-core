@@ -9,7 +9,7 @@ import pl.vtt.wpi.core.infrastructure.RequestSender;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.RuntimeData;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.port.input.RuntimeDataInputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.RuntimeDataInputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

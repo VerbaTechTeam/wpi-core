@@ -5,12 +5,12 @@
 Projekt jest biblioteką warstwową z elementami architektury portów i adapterów:
 
 - `domain.model` przechowuje modele domenowe, np. użytkownika, poświadczenia i dane urządzenia.
-- `domain.port` definiuje kontrakty `InputPort` i `OutputPort`, a podpakiety `input` oraz `output` zawierają porty specyficzne dla endpointów.
+- `domain.port` definiuje kontrakty `InputPort` i `OutputPort`, a implementacje portów specyficzne dla endpointów znajdują się w `infrastructure.adapter.http`.
 - `application.service` definiuje przypadki użycia widoczne dla klienta biblioteki.
 - `application.service.impl` orkiestruje przypadki użycia i komunikuje się z portami przez konstruktory.
 - `infrastructure` definiuje model żądania/odpowiedzi oraz abstrakcje wysyłania i obsługi żądań.
 
-To nie jest jeszcze ścisła Clean Architecture. Najważniejszy problem polega na tym, że pakiet `domain.port.input`/`domain.port.output` zawiera klasy portów, które znają infrastrukturę HTTP (`RequestFactory`, `RequestHandler`, `RequestSender`) i konkretne endpointy. W Clean Architecture domena powinna definiować abstrakcje wejścia/wyjścia, a adaptery infrastrukturalne powinny je implementować na zewnątrz warstwy domenowej. Obecnie część logiki adaptera znajduje się w `domain`.
+To nadal nie jest jeszcze ścisła Clean Architecture. Implementacje portów HTTP znajdują się już poza domeną, ale warstwa aplikacyjna importuje transportowe DTO z `infrastructure.dto`, a `domain.model.endpoint` nadal przechowuje szczegóły endpointów i metod komunikacji. W Clean Architecture kierunek zależności powinien prowadzić do środka: aplikacja nie powinna importować infrastruktury, a szczegóły protokołu HTTP powinny pozostać w adapterach zewnętrznych.
 
 ## Implementacja leniwej inicjalizacji i DI przez konstruktor
 
@@ -49,12 +49,13 @@ LoginService loginService = services.loginService();
 
 ## Co zrobić, aby architekturę można było uznać za Clean Architecture
 
-1. Przenieść klasy implementujące komunikację z endpointami z `domain.port.input` i `domain.port.output` do zewnętrznej warstwy adapterów, np. `infrastructure.adapter.http`.
+1. Pozostawić implementacje komunikacji z endpointami w zewnętrznym pakiecie adapterów, np. `infrastructure.adapter.http`, i nie cofać ich do domeny.
 2. Pozostawić w domenie wyłącznie stabilne modele i abstrakcyjne porty, bez zależności od `RequestFactory`, `RequestHandler`, `RequestSender`, URL-i ani metod HTTP.
 3. Rozdzielić porty use-case od portów gateway. Interfejsy przypadków użycia mogą pozostać w `application.service`, natomiast gatewaye powinny wyrażać język domeny, np. `UserGateway`, `RuntimeDataGateway`, `PixelProgramGateway`.
-4. Przenieść DTO transportowe zależne od API urządzenia poza domenę, jeśli reprezentują format komunikacji, a nie pojęcia domenowe.
-5. Utrzymywać composition root na brzegu systemu. `LazyApplicationServices` może być wygodnym, lekkim composition rootem biblioteki, ale pełna aplikacja powinna konfigurować konkretne adaptery infrastrukturalne poza domeną i aplikacją.
-6. Zachować regułę zależności: domena nie importuje aplikacji ani infrastruktury, aplikacja importuje domenę i porty abstrakcyjne, infrastruktura implementuje porty zdefiniowane wewnątrz.
+4. Nie przeciekać transportowych DTO z `infrastructure.dto` do warstwy aplikacyjnej. Jeśli `PasswordDto`, `UserCreateRequest` albo `AdminPasswordResetRequest` są częścią kontraktu przypadków użycia, powinny zostać zastąpione modelami wejściowymi aplikacji, a adapter HTTP powinien mapować je na własne DTO transportowe.
+5. Przenieść szczegóły endpointów, metod HTTP i URL-i z domeny do adapterów infrastrukturalnych albo do konfiguracji adaptera.
+6. Utrzymywać composition root na brzegu systemu. `LazyApplicationServices` może być wygodnym, lekkim composition rootem biblioteki, ale pełna aplikacja powinna konfigurować konkretne adaptery infrastrukturalne poza domeną i aplikacją.
+7. Zachować regułę zależności: domena nie importuje aplikacji ani infrastruktury, aplikacja importuje domenę i porty abstrakcyjne, infrastruktura implementuje porty zdefiniowane wewnątrz.
 
 ## Dlaczego DI przez konstruktor jest dobrym kierunkiem
 

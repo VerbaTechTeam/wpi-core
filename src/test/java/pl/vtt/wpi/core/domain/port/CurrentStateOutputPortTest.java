@@ -6,7 +6,7 @@ import pl.vtt.wpi.core.infrastructure.RequestHandler;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.CurrentState;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.port.output.CurrentStateOutputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.CurrentStateOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

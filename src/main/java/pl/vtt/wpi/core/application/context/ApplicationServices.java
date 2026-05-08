@@ -10,9 +10,6 @@ import pl.vtt.wpi.core.application.service.RebootService;
 import pl.vtt.wpi.core.application.service.RuntimeDataService;
 import pl.vtt.wpi.core.application.service.UserManagementService;
 
-/**
- * Composition-root facade for application use cases exposed by wpi-core.
- */
 public interface ApplicationServices {
     LoginService loginService();
 

@@ -8,7 +8,7 @@ import pl.vtt.wpi.core.infrastructure.RequestSender;
 import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.domain.port.input.RestartInputPort;
+import pl.vtt.wpi.core.infrastructure.adapter.http.RestartInputPort;
 
 import static org.junit.jupiter.api.Assertions.*;
 
