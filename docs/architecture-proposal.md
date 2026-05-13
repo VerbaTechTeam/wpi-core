@@ -1,28 +1,31 @@
-# Propozycja: leniwa inicjalizacja, DI przez konstruktor i kierunek Clean Architecture
+# Architektura: stan obecny i kierunek Clean Architecture
 
-## Aktualna architektura
+## Stan obecny
 
-Projekt jest biblioteką warstwową z elementami architektury portów i adapterów:
+Projekt jest biblioteką warstwową z elementami Ports & Adapters:
 
-- `domain.model` przechowuje modele domenowe, np. użytkownika, poświadczenia i dane urządzenia.
-- `domain.port` definiuje kontrakty `InputPort` i `OutputPort`, a implementacje portów specyficzne dla endpointów znajdują się w `infrastructure.adapter.http`.
-- `application.service` definiuje przypadki użycia widoczne dla klienta biblioteki.
-- `application.service.impl` orkiestruje przypadki użycia i komunikuje się z portami przez konstruktory.
-- `infrastructure` definiuje model żądania/odpowiedzi oraz abstrakcje wysyłania i obsługi żądań.
+- `domain.model` zawiera modele domenowe, np. użytkownika, poświadczenia, kolory i dane urządzenia.
+- `domain.port` zawiera abstrakcyjne kontrakty `InputPort` i `OutputPort` oraz wyjątki portów.
+- `application.service` zawiera publiczne interfejsy przypadków użycia.
+- `application.service.impl` zawiera implementacje przypadków użycia, które orkiestrują logikę aplikacyjną i przyjmują zależności przez konstruktory.
+- `application.context` zawiera lekki composition root: `ApplicationServices`, `Lazy` i `LazyApplicationServices`.
+- `infrastructure` zawiera model żądania/odpowiedzi, fabrykę żądań, abstrakcje wysyłania/obsługi żądań, DTO transportowe oraz adaptery HTTP.
+- `infrastructure.adapter.http` zawiera endpoint-specific implementacje portów wejściowych i wyjściowych.
+- `infrastructure.dto` zawiera transportowe rekordy żądań, np. `PasswordDto`, `UserCreateRequest` i `AdminPasswordResetRequest`.
 
-To nadal nie jest jeszcze ścisła Clean Architecture. Implementacje portów HTTP znajdują się już poza domeną, ale warstwa aplikacyjna importuje transportowe DTO z `infrastructure.dto`, a `domain.model.endpoint` nadal przechowuje szczegóły endpointów i metod komunikacji. W Clean Architecture kierunek zależności powinien prowadzić do środka: aplikacja nie powinna importować infrastruktury, a szczegóły protokołu HTTP powinny pozostać w adapterach zewnętrznych.
+Aktualny układ jest bliższy Clean Architecture niż wcześniejszy wariant, ponieważ implementacje portów HTTP i DTO transportowe zostały przeniesione poza domenę. Nie jest to jednak jeszcze ścisła Clean Architecture, ponieważ warstwa aplikacyjna nadal importuje DTO z `infrastructure.dto`, a `domain.model.endpoint` nadal zawiera szczegóły komunikacji, takie jak zasoby, metody HTTP i cele żądań.
 
-## Implementacja leniwej inicjalizacji i DI przez konstruktor
+## Leniwa inicjalizacja i DI przez konstruktor
 
-Dodany został prosty composition root w `application.context`:
+`LazyApplicationServices` pełni rolę composition root biblioteki:
 
-1. `ApplicationServices` jest fasadą udostępniającą interfejsy przypadków użycia.
-2. `LazyApplicationServices` przyjmuje dostawców portów w builderze.
-3. Każdy dostawca portu jest opakowany w memoizujący `Lazy<T>`.
-4. Konkretne serwisy są tworzone dopiero przy pierwszym wywołaniu odpowiedniej metody fasady.
-5. Gdy serwis jest tworzony, zależności są przekazywane przez jego konstruktor, więc same implementacje usług pozostają niezależne od kontenera.
+1. Builder przyjmuje dostawców portów (`Supplier<? extends InputPort<?>>` / `Supplier<? extends OutputPort<?>>`).
+2. Dostawcy są opakowywani w memoizujący `Lazy<T>`.
+3. Konkretne serwisy aplikacyjne są tworzone dopiero przy pierwszym wywołaniu odpowiedniej metody z `ApplicationServices`.
+4. Po utworzeniu instancja serwisu jest reużywana.
+5. Zależności nadal są przekazywane do implementacji serwisów przez konstruktory, więc same serwisy nie zależą od kontenera ani od mechanizmu lazy loading.
 
-Przykład użycia po stronie aplikacji-klienta:
+Przykład użycia:
 
 ```java
 ApplicationServices services = LazyApplicationServices.builder()
@@ -47,16 +50,41 @@ ApplicationServices services = LazyApplicationServices.builder()
 LoginService loginService = services.loginService();
 ```
 
-## Co zrobić, aby architekturę można było uznać za Clean Architecture
+## Dlaczego to nadal nie jest pełna Clean Architecture
 
-1. Pozostawić implementacje komunikacji z endpointami w zewnętrznym pakiecie adapterów, np. `infrastructure.adapter.http`, i nie cofać ich do domeny.
-2. Pozostawić w domenie wyłącznie stabilne modele i abstrakcyjne porty, bez zależności od `RequestFactory`, `RequestHandler`, `RequestSender`, URL-i ani metod HTTP.
-3. Rozdzielić porty use-case od portów gateway. Interfejsy przypadków użycia mogą pozostać w `application.service`, natomiast gatewaye powinny wyrażać język domeny, np. `UserGateway`, `RuntimeDataGateway`, `PixelProgramGateway`.
-4. Nie przeciekać transportowych DTO z `infrastructure.dto` do warstwy aplikacyjnej. Jeśli `PasswordDto`, `UserCreateRequest` albo `AdminPasswordResetRequest` są częścią kontraktu przypadków użycia, powinny zostać zastąpione modelami wejściowymi aplikacji, a adapter HTTP powinien mapować je na własne DTO transportowe.
-5. Przenieść szczegóły endpointów, metod HTTP i URL-i z domeny do adapterów infrastrukturalnych albo do konfiguracji adaptera.
-6. Utrzymywać composition root na brzegu systemu. `LazyApplicationServices` może być wygodnym, lekkim composition rootem biblioteki, ale pełna aplikacja powinna konfigurować konkretne adaptery infrastrukturalne poza domeną i aplikacją.
-7. Zachować regułę zależności: domena nie importuje aplikacji ani infrastruktury, aplikacja importuje domenę i porty abstrakcyjne, infrastruktura implementuje porty zdefiniowane wewnątrz.
+Najważniejsze pozostałe naruszenia kierunku zależności:
 
-## Dlaczego DI przez konstruktor jest dobrym kierunkiem
+1. `application.service` i `application.service.impl` używają typów z `infrastructure.dto`. Warstwa aplikacyjna nie powinna importować infrastruktury.
+2. `domain.model.endpoint` opisuje endpointy HTTP, zasoby, metody i reguły dostępu do request targetów. To jest szczegół komunikacji zewnętrznej, a nie czysty model domenowy.
+3. Generyczne `InputPort<T>` i `OutputPort<T>` są poprawnym krokiem separacji, ale nie opisują języka biznesowego tak dobrze jak dedykowane gatewaye, np. `UserGateway`, `RuntimeDataGateway` albo `PixelProgramGateway`.
+4. `application.context` tworzy konkretne implementacje usług, więc powinien pozostać composition rootem na brzegu modułu, a nie zależnością używaną wewnątrz domeny lub logiki aplikacyjnej.
 
-DI przez konstruktor sprawia, że zależności są jawne, obiekt nie może istnieć bez wymaganych portów, testy mogą przekazywać fałszywe implementacje, a implementacje usług nie muszą znać żadnego kontenera. Leniwy composition root uzupełnia ten model o opóźnienie kosztu inicjalizacji do momentu faktycznego użycia danej usługi lub portu.
+## Kroki do uzyskania Clean Architecture
+
+1. Wprowadzić modele wejściowe przypadków użycia w warstwie aplikacyjnej albo domenowej i usunąć importy `infrastructure.dto` z `application.service` oraz `application.service.impl`.
+2. Zostawić DTO transportowe wyłącznie w `infrastructure.dto`; adaptery HTTP powinny mapować modele aplikacyjne/domenowe na DTO transportowe i odwrotnie.
+3. Przenieść szczegóły endpointów (`RequestTarget`, `Resource`, HTTP `Method` używane jako protokół transportowy) z domeny do infrastruktury lub do konfiguracji adapterów HTTP.
+4. Zastąpić część generycznych portów dedykowanymi gatewayami opisującymi intencje domenowe, np. odczyt użytkowników, zapis danych runtime albo aktualizację programów pikseli.
+5. Utrzymywać regułę zależności: domena nie importuje aplikacji ani infrastruktury; aplikacja importuje domenę i abstrakcje; infrastruktura implementuje porty i zależy od warstw wewnętrznych.
+6. Traktować `LazyApplicationServices` jako wygodny composition root biblioteki. Aplikacja wyższego poziomu może użyć własnego kontenera DI, o ile nadal wstrzykuje zależności przez konstruktory.
+
+## Rekomendowany docelowy podział pakietów
+
+```text
+pl.vtt.wpi.core
+├── domain
+│   ├── model
+│   └── gateway        # dedykowane porty/gatewaye w języku domeny
+├── application
+│   ├── command/query  # modele wejściowe przypadków użycia, jeśli nie są domenowe
+│   ├── service        # interfejsy przypadków użycia
+│   └── service.impl   # implementacje przypadków użycia
+└── infrastructure
+    ├── adapter.http   # implementacje gatewayów/portów przez HTTP
+    ├── dto            # DTO transportowe
+    └── factory        # fabryki requestów i konfiguracja adapterów
+```
+
+## Podsumowanie
+
+Obecna architektura jest warstwowa i korzysta z elementów Ports & Adapters. Po przeniesieniu adapterów HTTP i DTO do infrastruktury domena jest czystsza, ale pełna Clean Architecture wymaga jeszcze usunięcia zależności aplikacji od infrastruktury oraz wyniesienia szczegółów HTTP z domeny.
