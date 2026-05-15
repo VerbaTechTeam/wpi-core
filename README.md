@@ -48,25 +48,39 @@ Then reference it in your project's `pom.xml`:
 
 ## Architecture
 
-The library follows a layered architecture:
+The library follows a layered architecture with constructor-based dependency injection. The public service interfaces describe application use cases, service implementations orchestrate those use cases, domain ports isolate request execution, and infrastructure abstractions model low-level request handling.
 
 ```text
 pl.vtt.wpi.core
 ├── application
 │   ├── config       # AuthorizationHolder (thread-local auth state)
+│   ├── context      # ApplicationServices facade + lazy composition root
 │   ├── exception    # Application-level exceptions
 │   └── service
 │       ├── ...      # Service interfaces (LoginService, RuntimeDataService, etc.)
-│       └── impl     # Internal service implementations
+│       └── impl     # Service implementations wired through constructors
 ├── domain
-│   ├── dto
-│   ├── model
-│   └── port         # Input/Output port contracts + endpoint-specific port implementations
+│   ├── dto          # Request DTOs used by application services and ports
+│   ├── model        # Domain values and device state models
+│   └── port         # Input/Output contracts + endpoint-specific port implementations
 └── infrastructure
     ├── Request / Response
     ├── RequestFactory / RequestHandler / RequestSender
     └── factory      # SynchronizedRequestFactory
 ```
+
+### Layer responsibilities
+
+| Layer | Responsibility |
+|---|---|
+| `application.service` | Stable use-case API exposed to library consumers. |
+| `application.service.impl` | Use-case orchestration, validation, exception mapping, and constructor-injected dependencies. |
+| `application.context` | Optional composition helper that lazily creates default service implementations from supplied ports. |
+| `domain.model` / `domain.dto` | Shared domain values, device data records, credentials, users, and request DTOs. |
+| `domain.port` | Generic `InputPort` / `OutputPort` contracts and endpoint-specific port implementations. |
+| `infrastructure` | Request/response abstractions and request factory/sender/handler contracts used by ports. |
+
+Application services do not create their own ports. Instead, callers either instantiate service implementations directly with constructor injection or use `LazyApplicationServices` as a small composition root. `LazyApplicationServices` accepts `Supplier` instances for all required ports, resolves each supplier only when a dependent service is first requested, and then reuses the created service instance.
 
 ## Key Concepts
 
@@ -116,7 +130,7 @@ Request<T> request = new Request<>(
 );
 ```
 
-### Application Services
+### Application Services and lazy composition
 
 The package `pl.vtt.wpi.core.application.service` currently exposes interfaces for:
 
@@ -130,7 +144,40 @@ The package `pl.vtt.wpi.core.application.service` currently exposes interfaces f
 - `DebugService`
 - `RebootService`
 
-Concrete implementations are provided in `pl.vtt.wpi.core.application.service.impl`.
+Concrete implementations are provided in `pl.vtt.wpi.core.application.service.impl`. They use constructor injection, so tests and applications can provide fake or real `InputPort` / `OutputPort` implementations explicitly.
+
+For applications that want a single access point, `pl.vtt.wpi.core.application.context` provides:
+
+- `ApplicationServices` — a facade exposing getters for all service interfaces.
+- `LazyApplicationServices` — a builder-based implementation that creates service implementations on first use.
+- `Lazy<T>` — a thread-safe memoizing supplier used internally by the composition root.
+
+Example composition:
+
+```java
+ApplicationServices services = LazyApplicationServices.builder()
+    .authOutputPort(() -> authOutputPort)
+    .adminPasswordResetInputPort(() -> adminPasswordResetInputPort)
+    .usersOutputPort(() -> usersOutputPort)
+    .userCreateRequestInputPort(() -> userCreateRequestInputPort)
+    .changePasswordInputPort(() -> changePasswordInputPort)
+    .removeUserInputPort(() -> removeUserInputPort)
+    .runtimeDataOutputPort(() -> runtimeDataOutputPort)
+    .pixelProgramsOutputPort(() -> pixelProgramsOutputPort)
+    .runtimeDataInputPort(() -> runtimeDataInputPort)
+    .pixelProgramsInputPort(() -> pixelProgramsInputPort)
+    .wifiConfigInputPort(() -> wifiConfigInputPort)
+    .deviceInfoOutputPort(() -> deviceInfoOutputPort)
+    .logsOutputPort(() -> logsOutputPort)
+    .logsDeleteInputPort(() -> logsDeleteInputPort)
+    .currentStateOutputPort(() -> currentStateOutputPort)
+    .rebootInputPort(() -> rebootInputPort)
+    .build();
+
+RuntimeDataService runtimeDataService = services.runtimeDataService();
+```
+
+Only `runtimeDataService`, `runtimeDataOutputPort`, `pixelProgramsOutputPort`, and `runtimeDataInputPort` are resolved by the final line in this example; unrelated ports remain uninitialized until another service is requested.
 
 ### Domain Ports
 
