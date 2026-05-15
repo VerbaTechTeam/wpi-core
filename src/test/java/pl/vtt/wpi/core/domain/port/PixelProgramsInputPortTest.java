@@ -10,7 +10,7 @@ import pl.vtt.wpi.core.domain.port.exception.InputPortException;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.infrastructure.adapter.http.PixelProgramsInputPort;
+import pl.vtt.wpi.core.domain.port.input.PixelProgramsInputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

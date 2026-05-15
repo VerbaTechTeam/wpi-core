@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.infrastructure.dto;
+package pl.vtt.wpi.core.domain.dto;
 
 public record PasswordDto(String password, String passwordConfirmation) {
     @Override

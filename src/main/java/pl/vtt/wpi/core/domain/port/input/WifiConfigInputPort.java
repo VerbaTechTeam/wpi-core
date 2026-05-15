@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.infrastructure.adapter.http;
+package pl.vtt.wpi.core.domain.port.input;
 
 import pl.vtt.wpi.core.infrastructure.RequestFactory;
 import pl.vtt.wpi.core.domain.port.InputPort;

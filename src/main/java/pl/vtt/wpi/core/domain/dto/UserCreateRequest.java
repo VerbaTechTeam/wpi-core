@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.infrastructure.dto;
+package pl.vtt.wpi.core.domain.dto;
 
 import pl.vtt.wpi.core.domain.model.User;
 

@@ -9,7 +9,7 @@ import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.User;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
 import pl.vtt.wpi.core.domain.model.endpoint.UserGroup;
-import pl.vtt.wpi.core.infrastructure.adapter.http.UsersOutputPort;
+import pl.vtt.wpi.core.domain.port.output.UsersOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

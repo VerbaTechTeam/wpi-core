@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.infrastructure.adapter.http;
+package pl.vtt.wpi.core.domain.port.output;
 
 import java.util.List;
 import pl.vtt.wpi.core.infrastructure.RequestFactory;

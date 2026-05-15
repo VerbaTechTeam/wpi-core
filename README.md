@@ -59,11 +59,10 @@ pl.vtt.wpi.core
 │       ├── ...      # Service interfaces (LoginService, RuntimeDataService, etc.)
 │       └── impl     # Internal service implementations
 ├── domain
+│   ├── dto
 │   ├── model
-│   └── port         # InputPort / OutputPort contracts
+│   └── port         # Input/Output port contracts + endpoint-specific port implementations
 └── infrastructure
-    ├── dto          # Transport request DTOs
-    ├── adapter.http # HTTP implementations of input/output ports
     ├── Request / Response
     ├── RequestFactory / RequestHandler / RequestSender
     └── factory      # SynchronizedRequestFactory
@@ -133,17 +132,14 @@ The package `pl.vtt.wpi.core.application.service` currently exposes interfaces f
 
 Concrete implementations are provided in `pl.vtt.wpi.core.application.service.impl`.
 
-### Ports and HTTP Adapters
+### Domain Ports
 
-The package `pl.vtt.wpi.core.domain.port` contains generic port contracts:
+The package `pl.vtt.wpi.core.domain.port` contains port contracts and endpoint-specific implementations:
 
-- **Port contracts**: `InputPort`, `OutputPort`
+- **Output ports**: `AuthOutputPort`, `DeviceInfoOutputPort`, `RuntimeDataOutputPort`, `CurrentStateOutputPort`, `PixelProgramsOutputPort`, `UsersOutputPort`
+- **Input ports**: `RuntimeDataInputPort`, `WifiConfigInputPort`, `PixelProgramsInputPort`, `UserCreateInputPort`, `RestartInputPort`, `LogsDeleteInputPort`
 
-Endpoint-specific HTTP implementations are provided by `pl.vtt.wpi.core.infrastructure.adapter.http`:
-
-- **HTTP port adapters**: `AuthOutputPort`, `DeviceInfoOutputPort`, `RuntimeDataOutputPort`, `CurrentStateOutputPort`, `PixelProgramsOutputPort`, `UsersOutputPort`, `RuntimeDataInputPort`, `WifiConfigInputPort`, `PixelProgramsInputPort`, `UserCreateInputPort`, `RestartInputPort`, `LogsDeleteInputPort`
-
-These adapters encapsulate endpoint/method selection and exception mapping (`InputPortException` / `OutputPortException`), making application services thinner and easier to test.
+These ports encapsulate endpoint/method selection and exception mapping (`InputPortException` / `OutputPortException`), making application services thinner and easier to test.
 
 ## Building & Testing
 

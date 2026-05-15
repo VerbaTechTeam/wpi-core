@@ -7,7 +7,7 @@ import pl.vtt.wpi.core.infrastructure.RequestHandler;
 import pl.vtt.wpi.core.infrastructure.Request;
 import pl.vtt.wpi.core.domain.model.device.PixelProgram;
 import pl.vtt.wpi.core.domain.model.endpoint.Method;
-import pl.vtt.wpi.core.infrastructure.adapter.http.PixelProgramsOutputPort;
+import pl.vtt.wpi.core.domain.port.output.PixelProgramsOutputPort;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

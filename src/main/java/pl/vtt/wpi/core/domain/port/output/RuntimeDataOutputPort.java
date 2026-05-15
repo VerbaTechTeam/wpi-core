@@ -1,4 +1,4 @@
-package pl.vtt.wpi.core.infrastructure.adapter.http;
+package pl.vtt.wpi.core.domain.port.output;
 
 import pl.vtt.wpi.core.infrastructure.RequestFactory;
 import pl.vtt.wpi.core.infrastructure.RequestHandler;
@@ -23,9 +23,6 @@ public class RuntimeDataOutputPort implements OutputPort<RuntimeData> {
         try {
             return requestHandler.handle(requestFactory.create(null, Method.GET, RequestTarget.DATA_READ));
         } catch (Exception e) {
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
             throw new OutputPortException("Cannot load runtime data", e);
         }
     }
